@@ -37,7 +37,15 @@
       "Bash(php artisan make:controller Admin/AdminHorarioController --no-interaction)",
       "Bash(php artisan make:controller Admin/AdminReservasController --no-interaction)",
       "Bash(php artisan db:seed --class=HorarioConfigSeeder --no-interaction)",
-      "Bash(npm install)"
+      "Bash(npm install)",
+      "Bash(php artisan make:migration add_en_mantenimiento_to_horario_config --table=horario_config --no-interaction)",
+      "Bash(npm install flatpickr @fullcalendar/core @fullcalendar/daygrid @fullcalendar/timegrid)",
+      "Bash(php artisan make:migration add_horas_min_to_horario_config --no-interaction)",
+      "Bash(\"d:/trabajillos/minigolf_reservas/resources/views/auth/login.blade.php\":*)",
+      "Bash(\"d:/trabajillos/minigolf_reservas/resources/views/auth/register.blade.php\":*)",
+      "Bash(php artisan make:request AdminCrearReservaRequest --no-interaction)",
+      "Bash(\"d:/trabajillos/minigolf_reservas/resources/views/admin/reservas/partials/modal-crear.blade.php\":*)",
+      "Bash(\"d:/trabajillos/minigolf_reservas/README.md\":*)"
     ]
   }
 }

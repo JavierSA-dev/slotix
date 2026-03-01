@@ -67,28 +67,27 @@
         </div>
     </div>
 
-    <div class="row g-3">
-        <div class="col-md-6">
-            <a href="{{ route('admin.reservas.index') }}" class="card text-decoration-none">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <i class="bx bx-list-ul font-size-24 text-primary"></i>
-                    <div>
-                        <h6 class="mb-0">Ver todas las reservas</h6>
-                        <small class="text-muted">Gestiona y filtra las reservas</small>
-                    </div>
+    {{-- Calendario de reservas --}}
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0">Calendario de reservas</h5>
+                <div class="d-flex gap-2 align-items-center" style="font-size: 0.8rem; color: #6c757d;">
+                    <span class="d-flex align-items-center gap-1">
+                        <span style="width:12px;height:12px;background:#2a5228;border-radius:3px;display:inline-block;"></span>
+                        Confirmada
+                    </span>
+                    <span class="d-flex align-items-center gap-1">
+                        <span style="width:12px;height:12px;background:#856404;border-radius:3px;display:inline-block;"></span>
+                        Pendiente
+                    </span>
                 </div>
-            </a>
-        </div>
-        <div class="col-md-6">
-            <a href="{{ route('admin.horario.index') }}" class="card text-decoration-none">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <i class="bx bx-time-five font-size-24 text-success"></i>
-                    <div>
-                        <h6 class="mb-0">Configurar horario</h6>
-                        <small class="text-muted">Días, franjas y aforo</small>
-                    </div>
-                </div>
-            </a>
+            </div>
+            <div id="admin-calendar" data-events-url="{{ route('admin.reservas.calendarEvents') }}"></div>
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/pages/admin-dashboard.js'])
+@endpush

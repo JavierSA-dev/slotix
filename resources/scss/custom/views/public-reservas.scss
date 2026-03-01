@@ -2,6 +2,8 @@
 // Minigolf Córdoba – Vista pública de reservas
 // ═══════════════════════════════════════════════════════
 
+@import 'flatpickr/dist/flatpickr.min.css';
+
 // Variables de marca
 :root {
     --mg-dark:       #0d1a0d;
@@ -89,69 +91,113 @@
     }
 }
 
-// ─── CARRUSEL DE FECHAS ──────────────────────────────────
-.fecha-selector {
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-    scrollbar-width: thin;
-    scrollbar-color: var(--mg-gold-dim) var(--mg-dark-3);
+// ─── LAYOUT DOS COLUMNAS (calendario + franjas) ──────────
+.mg-reserva-layout {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    align-items: start;
 
-    &::-webkit-scrollbar {
-        height: 4px;
-    }
-    &::-webkit-scrollbar-track {
-        background: var(--mg-dark-3);
-    }
-    &::-webkit-scrollbar-thumb {
-        background: var(--mg-gold-dim);
-        border-radius: 2px;
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
     }
 }
 
-.fecha-pill {
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0.6rem 1rem;
+.mg-calendar-wrapper {
+    flex-shrink: 0;
+}
+
+.mg-franjas-wrapper {
+    min-width: 0;
+}
+
+// ─── FLATPICKR TEMA MINIGOLF ─────────────────────────────
+.flatpickr-calendar {
+    background: var(--mg-dark-2) !important;
+    border: 1px solid var(--mg-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+    font-family: inherit;
+
+    &.inline {
+        width: 100%;
+        max-width: 320px;
+    }
+}
+
+.flatpickr-months {
     background: var(--mg-dark-3);
-    border: 1px solid var(--mg-border);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    min-width: 72px;
-    color: var(--mg-text-muted);
-    font-size: 0.85rem;
-    line-height: 1.3;
-    white-space: nowrap;
+    border-radius: 11px 11px 0 0;
+    padding: 0.5rem 0;
 
-    .fecha-pill-dia {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+    .flatpickr-month {
+        color: var(--mg-gold) !important;
+        fill: var(--mg-gold) !important;
     }
 
-    .fecha-pill-num {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--mg-text);
+    .flatpickr-prev-month,
+    .flatpickr-next-month {
+        color: var(--mg-gold) !important;
+        fill: var(--mg-gold) !important;
+
+        &:hover {
+            color: var(--mg-text) !important;
+            fill: var(--mg-text) !important;
+        }
     }
+
+    .numInputWrapper {
+        color: var(--mg-gold);
+
+        input {
+            color: var(--mg-gold);
+        }
+    }
+}
+
+.flatpickr-weekday {
+    color: var(--mg-text-muted) !important;
+    font-size: 0.75rem;
+}
+
+.flatpickr-day {
+    color: var(--mg-text) !important;
+    border-radius: 8px !important;
 
     &:hover {
-        border-color: var(--mg-gold-dim);
-        color: var(--mg-text);
+        background: var(--mg-dark-3) !important;
+        border-color: var(--mg-gold-dim) !important;
     }
 
-    &.active {
-        background: var(--mg-gold);
-        border-color: var(--mg-gold);
-        color: #0d1a0d;
+    &.selected,
+    &.selected:hover {
+        background: var(--mg-gold) !important;
+        border-color: var(--mg-gold) !important;
+        color: #0d1a0d !important;
+        font-weight: 700;
+    }
 
-        .fecha-pill-num {
-            color: #0d1a0d;
+    &.today {
+        border-color: var(--mg-gold-dim) !important;
+    }
+
+    &.today.selected {
+        border-color: var(--mg-gold) !important;
+    }
+
+    &.flatpickr-disabled {
+        color: rgba(255,255,255,0.15) !important;
+        cursor: not-allowed;
+
+        &:hover {
+            background: transparent !important;
+            border-color: transparent !important;
         }
+    }
+
+    &.prevMonthDay,
+    &.nextMonthDay {
+        color: rgba(255,255,255,0.15) !important;
     }
 }
 

@@ -3,9 +3,10 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>@yield('title') | Minigolf</title>
+    <title>@yield('title', 'Panel') | Minigolf Córdoba</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Minigolf - Sistema de reservas" name="description" />
+    <meta name="description" content="Panel de administración de Minigolf Córdoba. Gestiona reservas, horarios y aforo.">
+    <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- App favicon -->
     <base href="{{ url('/') }}/">

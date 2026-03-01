@@ -30,8 +30,9 @@
                 </li>
                 @endhasanyrole
 
-                {{-- USUARIO AUTENTICADO --}}
+                {{-- USUARIO AUTENTICADO (solo usuarios sin rol admin) --}}
                 @auth
+                @unlessrole('SuperAdmin|Admin')
                 <li class="menu-title">Mi cuenta</li>
 
                 <li>
@@ -40,6 +41,7 @@
                         <span>Mis reservas</span>
                     </a>
                 </li>
+                @endunlessrole
                 @endauth
 
                 {{-- ADMINISTRACIÓN (solo SuperAdmin) --}}

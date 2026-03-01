@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\HorarioConfig;
 use App\Models\Reserva;
+use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 
 class AdminDashboardController extends Controller
@@ -25,5 +27,17 @@ class AdminDashboardController extends Controller
             ->count();
 
         return view('admin.dashboard', compact('reservasHoy', 'reservasSemana', 'canceladasMes'));
+    }
+
+    public function toggleMantenimiento(): JsonResponse
+    {
+        $horario = HorarioConfig::where('activo', true)->firstOrFail();
+        $horario->update(['en_mantenimiento' => ! $horario->en_mantenimiento]);
+        cache()->forget('mantenimiento_activo');
+
+        return response()->json([
+            'en_mantenimiento' => $horario->en_mantenimiento,
+            'message' => $horario->en_mantenimiento ? 'Mantenimiento activado.' : 'Mantenimiento desactivado.',
+        ]);
     }
 }

@@ -1,7 +1,11 @@
 /**
  * reservas-public.js
  * Lógica de la vista pública de reservas del Minigolf Córdoba.
+ * Usa Flatpickr para la selección de fecha.
  */
+
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es.js';
 
 $(function () {
     // ─── ESTADO ────────────────────────────────────────────────
@@ -9,42 +13,61 @@ $(function () {
     let horaInicioSeleccionada = null;
 
     const $franjasWrapper = $('#franjas-wrapper');
-    const $fechaSelector = $('#fecha-selector');
 
     // ─── HELPERS ───────────────────────────────────────────────
 
-    /**
-     * Convierte decimal a string HH:MM para mostrar al usuario.
-     * 10.5 → "10:30"
-     */
     function decimalAHora(decimal) {
         const h = Math.floor(decimal);
         const m = Math.round((decimal - h) * 60);
         return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
     }
 
-    /**
-     * Convierte fecha YYYY-MM-DD a formato dd/mm/YYYY para mostrar.
-     */
     function formatearFecha(fechaStr) {
         const [y, m, d] = fechaStr.split('-');
         return `${d}/${m}/${y}`;
     }
 
-    // ─── SELECCIÓN DE FECHA ────────────────────────────────────
+    // ─── FLATPICKR ─────────────────────────────────────────────
 
-    $fechaSelector.on('click', '.fecha-pill', function () {
-        $fechaSelector.find('.fecha-pill').removeClass('active');
-        $(this).addClass('active');
+    const calendarEl = document.getElementById('mg-calendar');
+    if (!calendarEl) return;
 
-        fechaSeleccionada = $(this).data('fecha');
-        cargarFranjas(fechaSeleccionada);
+    // dias_semana PHP: 0=Lun, 1=Mar, ..., 6=Dom
+    // JS getDay():     0=Dom, 1=Lun, ..., 6=Sab
+    // Conversión: phpDay = jsDay === 0 ? 6 : jsDay - 1
+    const diasHabiles = window.mgDiasHabiles || [0, 1, 2, 3, 4, 5, 6];
+
+    const fp = flatpickr(calendarEl, {
+        locale: Spanish,
+        inline: true,
+        minDate: 'today',
+        dateFormat: 'Y-m-d',
+        disable: [
+            function (date) {
+                const jsDay = date.getDay();
+                const phpDay = jsDay === 0 ? 6 : jsDay - 1;
+                return !diasHabiles.includes(phpDay);
+            }
+        ],
+        onChange: function (selectedDates, dateStr) {
+            if (dateStr) {
+                fechaSeleccionada = dateStr;
+                cargarFranjas(dateStr);
+            }
+        }
     });
 
-    // Auto-click en la primera fecha al cargar
-    const $primeraPill = $fechaSelector.find('.fecha-pill').first();
-    if ($primeraPill.length) {
-        $primeraPill.trigger('click');
+    // Auto-seleccionar hoy o el primer día hábil disponible
+    let diaInicial = new Date();
+    diaInicial.setHours(0, 0, 0, 0);
+    for (let i = 0; i < 60; i++) {
+        const jsDay = diaInicial.getDay();
+        const phpDay = jsDay === 0 ? 6 : jsDay - 1;
+        if (diasHabiles.includes(phpDay)) {
+            fp.setDate(diaInicial, true);
+            break;
+        }
+        diaInicial.setDate(diaInicial.getDate() + 1);
     }
 
     // ─── CARGA DE FRANJAS (AJAX) ───────────────────────────────
@@ -72,21 +95,16 @@ $(function () {
         }
 
         let html = '<div class="franjas-grid">';
-
         franjas.forEach(function (franja) {
             const llena = !franja.disponible;
             const libre = franja.aforo - franja.reservadas;
-            const claseLlena = llena ? ' llena' : '';
-            const attrDisabled = llena ? '' : '';
-
             html += `
-                <div class="franja-card${claseLlena}"
+                <div class="franja-card${llena ? ' llena' : ''}"
                      ${!llena ? `data-hora="${franja.hora_inicio}"` : ''}>
                     <div class="franja-hora">${franja.hora_inicio_fmt}</div>
                     <div class="franja-aforo">${llena ? 'Sin plazas' : libre + ' plaza' + (libre !== 1 ? 's' : '')}</div>
                 </div>`;
         });
-
         html += '</div>';
         $franjasWrapper.html(html);
     }
@@ -96,22 +114,13 @@ $(function () {
     $franjasWrapper.on('click', '.franja-card:not(.llena)', function () {
         horaInicioSeleccionada = parseFloat($(this).data('hora'));
 
-        // Rellenar hidden inputs del modal
         $('#reserva-fecha').val(fechaSeleccionada);
         $('#reserva-hora-inicio').val(horaInicioSeleccionada);
+        $('#reserva-franja-display').text(decimalAHora(horaInicioSeleccionada));
+        $('#reserva-fecha-display').text(formatearFecha(fechaSeleccionada));
 
-        // Actualizar display informativo del modal
-        const horaStr = decimalAHora(horaInicioSeleccionada);
-        const fechaFmt = formatearFecha(fechaSeleccionada);
-        $('#reserva-franja-display').text(horaStr);
-        $('#reserva-fecha-display').text(fechaFmt);
-
-        // Resetear estado del modal
         resetModal();
-
-        // Abrir modal
-        const modal = new bootstrap.Modal(document.getElementById('modal-reserva'));
-        modal.show();
+        new bootstrap.Modal(document.getElementById('modal-reserva')).show();
     });
 
     // ─── SUBMIT DEL FORMULARIO DE RESERVA ──────────────────────
@@ -122,43 +131,29 @@ $(function () {
 
     function enviarReserva() {
         const $btn = $('#btn-confirmar-reserva');
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Confirmando...');
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Enviando...');
         $('#form-reserva-error').text('');
         $('[data-field-error]').text('');
-
-        const formData = $('#form-reserva').serialize();
 
         $.ajax({
             url: '/reservas',
             method: 'POST',
-            data: formData,
+            data: $('#form-reserva').serialize(),
             success: function (response) {
-                // Mostrar éxito
                 $('#form-reserva').addClass('d-none');
                 $('#modal-reserva-footer').addClass('d-none');
                 $('#reserva-success').removeClass('d-none');
                 $('#reserva-gestion-link').attr('href', response.url);
-
-                // Refrescar franjas para mostrar la disponibilidad actualizada
-                if (fechaSeleccionada) {
-                    cargarFranjas(fechaSeleccionada);
-                }
+                if (fechaSeleccionada) { cargarFranjas(fechaSeleccionada); }
             },
             error: function (xhr) {
-                $btn.prop('disabled', false).text('Confirmar reserva');
-
+                $btn.prop('disabled', false).text('Enviar solicitud');
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON?.errors || {};
-
-                    // Mostrar errores de campo
                     Object.keys(errors).forEach(function (campo) {
                         const $el = $('[data-field-error="' + campo + '"]');
-                        if ($el.length) {
-                            $el.text(errors[campo][0]);
-                        }
+                        if ($el.length) { $el.text(errors[campo][0]); }
                     });
-
-                    // Mensaje genérico si no hay errores de campo
                     const mensaje = xhr.responseJSON?.message || '';
                     if (mensaje && !Object.keys(errors).length) {
                         $('#form-reserva-error').text(mensaje);
@@ -178,15 +173,10 @@ $(function () {
         $('[data-field-error]').text('');
         $('#reserva-success').addClass('d-none');
         $('#modal-reserva-footer').removeClass('d-none');
-        $('#btn-confirmar-reserva').prop('disabled', false).text('Confirmar reserva');
-
-        // Restaurar hidden inputs (el reset los borra)
+        $('#btn-confirmar-reserva').prop('disabled', false).text('Enviar solicitud');
         $('#reserva-fecha').val(fechaSeleccionada);
         $('#reserva-hora-inicio').val(horaInicioSeleccionada);
     }
 
-    // Resetear también cuando se cierra el modal
-    document.getElementById('modal-reserva')?.addEventListener('hidden.bs.modal', function () {
-        resetModal();
-    });
+    document.getElementById('modal-reserva')?.addEventListener('hidden.bs.modal', resetModal);
 });

@@ -3,12 +3,11 @@
 
     <head>
         <meta charset="utf-8" />
-        <title> @yield('title') | Skote - Responsive Bootstrap 4 Admin Dashboard</title>
+        <title>@yield('title') | Minigolf Córdoba</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- CSRF Token -->
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
-        <meta content="Themesbrand" name="author" />
+        <meta name="description" content="Minigolf Córdoba - Sistema de gestión de reservas.">
+        <meta name="robots" content="noindex, nofollow">
         <!-- App favicon -->
         <link rel="shortcut icon" href="{{ URL::asset('build/images/favicon.ico') }}">
         <base href="{{ url('/') }}/">

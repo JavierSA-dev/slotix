@@ -2,25 +2,31 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\HorarioConfig;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckMaintenanceMode
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
-        $allowedIps = explode(',', env('IPS_PERMITIDAS_EN_MANTENIMIENTO', ''));
+        // Rutas de autenticación y admin siempre accesibles
+        if ($request->is('admin', 'admin/*', 'login', 'logout', 'password/*', 'home', 'update-password/*', 'update-profile/*')) {
+            return $next($request);
+        }
 
-        if (env('APP_MAINTENANCE_MODE', true)) {
-            if (!in_array($request->ip(), $allowedIps)) {
-                return response()->view('mantenimiento.maintenance'); // Vista personalizada
+        // Admins autenticados siempre pueden pasar
+        if (auth()->check() && auth()->user()->hasAnyRole(['SuperAdmin', 'Admin'])) {
+            return $next($request);
+        }
+
+        try {
+            if (HorarioConfig::enMantenimiento()) {
+                return response()->view('mantenimiento.public', [], 503);
             }
+        } catch (\Exception $e) {
+            // Si hay error de BD, no bloqueamos
         }
 
         return $next($request);

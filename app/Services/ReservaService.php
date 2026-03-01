@@ -43,17 +43,31 @@ class ReservaService
         $horaActual = (float) $horario->hora_apertura;
         $horaCierre = (float) $horario->hora_cierre;
 
-        // Obtener reservas del día de una sola consulta (previene N+1)
+        // Hora mínima permitida para reservar hoy (hora actual + antelación mínima configurada).
+        $esHoy = $fecha->isSameDay(Carbon::today());
+        $horaMinPermitida = null;
+        if ($esHoy) {
+            $ahora = Carbon::now();
+            $horaAhoraDecimal = $ahora->hour + ($ahora->minute / 60);
+            $horaMinPermitida = $horaAhoraDecimal + ($horario->horas_min_reserva ?? 0);
+        }
+
+        // Obtener reservas del día de una sola consulta (previene N+1).
+        // mapWithKeys normaliza las claves a float (MySQL devuelve decimal como string "10.00").
         $reservasPorFranja = Reserva::where('fecha', $fecha->format('Y-m-d'))
             ->whereIn('estado', ['pendiente', 'confirmada'])
             ->selectRaw('hora_inicio, SUM(num_personas) as total')
             ->groupBy('hora_inicio')
-            ->pluck('total', 'hora_inicio')
+            ->get()
+            ->mapWithKeys(fn ($r) => [(float) $r->hora_inicio => (int) $r->total])
             ->toArray();
 
         while ($horaActual < $horaCierre - $paso + 0.001) {
             $horaFin = round($horaActual + $paso, 4);
-            $reservadas = (int) ($reservasPorFranja[(string) $horaActual] ?? $reservasPorFranja[$horaActual] ?? 0);
+            $reservadas = $reservasPorFranja[$horaActual] ?? 0;
+
+            // Bloquear franjas pasadas o que no cumplen la antelación mínima.
+            $bloqueadaPorTiempo = $horaMinPermitida !== null && $horaActual < $horaMinPermitida;
 
             $franjas[] = [
                 'hora_inicio' => $horaActual,
@@ -62,7 +76,7 @@ class ReservaService
                 'hora_fin_fmt' => $this->decimalAHora($horaFin),
                 'reservadas' => $reservadas,
                 'aforo' => $horario->aforo_por_tramo,
-                'disponible' => $reservadas < $horario->aforo_por_tramo,
+                'disponible' => ! $bloqueadaPorTiempo && $reservadas < $horario->aforo_por_tramo,
             ];
 
             $horaActual = round($horaActual + $paso, 4);
@@ -109,7 +123,7 @@ class ReservaService
             'hora_fin' => round($data['hora_inicio'] + $paso, 4),
             'num_personas' => $data['num_personas'],
             'token' => Str::uuid()->toString(),
-            'estado' => 'confirmada',
+            'estado' => 'pendiente',
             'notas' => $data['notas'] ?? null,
         ]);
     }

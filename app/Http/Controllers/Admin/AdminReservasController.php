@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\DataTables\ReservaDataTableConfig;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminCrearReservaRequest;
+use App\Mail\ReservaConfirmadaMail;
 use App\Models\Reserva;
 use App\Services\ReservaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -43,6 +46,76 @@ class AdminReservasController extends Controller
             ->make(true);
     }
 
+    public function confirmar(Reserva $reserva): JsonResponse
+    {
+        if ($reserva->estado !== 'pendiente') {
+            return response()->json(['message' => 'Solo se pueden confirmar reservas pendientes.'], 422);
+        }
+
+        $reserva->update(['estado' => 'confirmada']);
+        $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada));
+
+        return response()->json(['message' => 'Reserva confirmada.']);
+    }
+
+    public function cancelarAdmin(Reserva $reserva): JsonResponse
+    {
+        if ($reserva->estado === 'cancelada') {
+            return response()->json(['message' => 'La reserva ya está cancelada.'], 422);
+        }
+
+        $this->reservaService->cancelarReserva($reserva);
+
+        return response()->json(['message' => 'Reserva cancelada.']);
+    }
+
+    public function storeAdmin(AdminCrearReservaRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        $reserva = $this->reservaService->crearReserva($data);
+        $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada));
+
+        return response()->json(['message' => 'Reserva creada correctamente.', 'id' => $reserva->id]);
+    }
+
+    public function calendarEvents(Request $request): JsonResponse
+    {
+        $start = $request->input('start', today()->format('Y-m-d'));
+        $end = $request->input('end', today()->addMonth()->format('Y-m-d'));
+
+        $reservas = Reserva::whereBetween('fecha', [
+            substr($start, 0, 10),
+            substr($end, 0, 10),
+        ])
+            ->whereIn('estado', ['pendiente', 'confirmada'])
+            ->get();
+
+        $events = $reservas->map(function ($r) {
+            $horaInicio = $this->reservaService->decimalAHora((float) $r->hora_inicio);
+            $horaFin = $this->reservaService->decimalAHora((float) $r->hora_fin);
+
+            return [
+                'id' => $r->id,
+                'title' => $r->nombre.' ('.$r->num_personas.'p)',
+                'start' => $r->fecha->format('Y-m-d').'T'.$horaInicio.':00',
+                'end' => $r->fecha->format('Y-m-d').'T'.$horaFin.':00',
+                'backgroundColor' => $r->estado === 'confirmada' ? '#2a5228' : '#856404',
+                'borderColor' => $r->estado === 'confirmada' ? '#3a7038' : '#c69444',
+                'textColor' => '#ffffff',
+                'extendedProps' => [
+                    'estado' => $r->estado,
+                    'email' => $r->email,
+                    'personas' => $r->num_personas,
+                    'token' => $r->token,
+                ],
+            ];
+        });
+
+        return response()->json($events);
+    }
+
     private function applyFilters($query, Request $request): void
     {
         if ($request->filled('fecha')) {
@@ -72,10 +145,20 @@ class AdminReservasController extends Controller
 
     private function renderAcciones(Reserva $reserva): string
     {
-        $url = route('reservas.show', $reserva->token);
+        $urlVer = route('reservas.show', $reserva->token);
+        $btn = '<div class="d-flex gap-1 justify-content-center">';
+        $btn .= '<a href="'.$urlVer.'" target="_blank" class="btn btn-sm btn-info" title="Ver reserva"><i class="fa fa-eye"></i></a>';
 
-        return '<a href="'.$url.'" target="_blank" class="btn btn-sm btn-info" title="Ver reserva">
-                    <i class="fa fa-eye"></i>
-                </a>';
+        if ($reserva->estado === 'pendiente') {
+            $btn .= '<button class="btn btn-sm btn-success btn-confirmar-reserva" data-id="'.$reserva->id.'" title="Confirmar"><i class="fa fa-check"></i></button>';
+        }
+
+        if ($reserva->estado !== 'cancelada') {
+            $btn .= '<button class="btn btn-sm btn-danger btn-cancelar-reserva" data-id="'.$reserva->id.'" title="Cancelar"><i class="fa fa-times"></i></button>';
+        }
+
+        $btn .= '</div>';
+
+        return $btn;
     }
 }

@@ -1,238 +1,117 @@
-@extends('layouts.master-without-nav')
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Crear cuenta | Minigolf Córdoba</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="Crea tu cuenta para gestionar tus reservas en Minigolf Córdoba fácilmente.">
+    <link rel="shortcut icon" href="{{ URL::asset('build/images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ URL::asset('build/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ URL::asset('build/css/icons.min.css') }}">
+    @vite(['resources/scss/custom/views/public-reservas.scss'])
+</head>
+<body class="mg-body d-flex align-items-center justify-content-center" style="min-height:100vh; padding:2rem 0;">
 
-@section('title')
-    @lang('translation.Register') 2
-@endsection
+    <div class="w-100" style="max-width:420px; padding:1.5rem;">
 
-@section('css')
-    <!-- owl.carousel css -->
-    <link rel="stylesheet" href="{{ URL::asset('build/libs/owl.carousel/assets/owl.carousel.min.css') }}">
-    <link rel="stylesheet" href="{{ URL::asset('build/libs/owl.carousel/assets/owl.theme.default.min.css') }}">
-    <link href="{{ URL::asset('build/libs/bootstrap-datepicker/bootstrap-datepicker.min.css') }}" rel="stylesheet" type="text/css">
-@endsection
-
-@section('body')
-
-    <body class="auth-body-bg">
-    @endsection
-
-    @section('content')
-
-        <div>
-            <div class="container-fluid p-0">
-                <div class="row g-0">
-
-                    <div class="col-xl-9">
-                        <div class="auth-full-bg pt-lg-5 p-4">
-                            <div class="w-100">
-                                <div class="bg-overlay"></div>
-                                <div class="d-flex h-100 flex-column">
-
-                                    <div class="p-4 mt-auto">
-                                        <div class="row justify-content-center">
-                                            <div class="col-lg-7">
-                                                <div class="text-center">
-
-                                                    <h4 class="mb-3"><i
-                                                            class="bx bxs-quote-alt-left text-primary h1 align-middle me-3"></i><span
-                                                            class="text-primary">5k</span>+ Satisfied clients</h4>
-
-                                                    <div dir="ltr">
-                                                        <div class="owl-carousel owl-theme auth-review-carousel"
-                                                            id="auth-review-carousel">
-                                                            <div class="item">
-                                                                <div class="py-3">
-                                                                    <p class="font-size-16 mb-4">" Fantastic theme with a
-                                                                        ton of options. If you just want the HTML to
-                                                                        integrate with your project, then this is the
-                                                                        package. You can find the files in the 'dist'
-                                                                        folder...no need to install git and all the other
-                                                                        stuff the documentation talks about. "</p>
-
-                                                                    <div>
-                                                                        <h4 class="font-size-16 text-primary">Abs1981</h4>
-                                                                        <p class="font-size-14 mb-0">- Skote User</p>
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-
-                                                            <div class="item">
-                                                                <div class="py-3">
-                                                                    <p class="font-size-16 mb-4">" If Every Vendor on Envato
-                                                                        are as supportive as Themesbrand, Development with
-                                                                        be a nice experience. You guys are Wonderful. Keep
-                                                                        us the good work. "</p>
-
-                                                                    <div>
-                                                                        <h4 class="font-size-16 text-primary">nezerious</h4>
-                                                                        <p class="font-size-14 mb-0">- Skote User</p>
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end col -->
-
-                    <div class="col-xl-3">
-                        <div class="auth-full-page-content p-md-5 p-4">
-                            <div class="w-100">
-
-                                <div class="d-flex flex-column h-100">
-                                    <div class="mb-4 mb-md-5">
-                                        <a href="index" class="d-block auth-logo">
-                                            <img src="{{ URL::asset('build/images/logo-dark.png') }}" alt="" height="18"
-                                                class="auth-logo-dark">
-                                            <img src="{{ URL::asset('build/images/logo-light.png') }}" alt="" height="18"
-                                                class="auth-logo-light">
-                                        </a>
-                                    </div>
-                                    <div class="my-auto">
-
-                                        <div>
-                                            <h5 class="text-primary">Register account</h5>
-                                            <p class="text-muted">Get your free Skote account now.</p>
-                                        </div>
-
-                                        <div class="mt-4">
-                                            <form method="POST" class="form-horizontal" action="{{ route('register') }}" enctype="multipart/form-data">
-                                                @csrf
-                                                <div class="mb-3">
-                                                    <label for="useremail" class="form-label">Email <span class="text-danger">*</span></label>
-                                                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="useremail"
-                                                    value="{{ old('email') }}" name="email" placeholder="Enter email" autofocus required>
-                                                    @error('email')
-                                                        <span class="invalid-feedback" role="alert">
-                                                            <strong>{{ $message }}</strong>
-                                                        </span>
-                                                    @enderror
-                                                </div>
-        
-                                                <div class="mb-3">
-                                                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                                    value="{{ old('name') }}" id="name" name="name" autofocus required
-                                                        placeholder="Enter name">
-                                                    @error('name')
-                                                        <span class="invalid-feedback" role="alert">
-                                                            <strong>{{ $message }}</strong>
-                                                        </span>
-                                                    @enderror
-                                                </div>
-        
-                                                <div class="mb-3">
-                                                    <label for="userpassword" class="form-label">Password <span class="text-danger">*</span></label>
-                                                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="userpassword" name="password"
-                                                        placeholder="Enter password" autofocus required>
-                                                        @error('password')
-                                                        <span class="invalid-feedback" role="alert">
-                                                            <strong>{{ $message }}</strong>
-                                                        </span>
-                                                    @enderror
-                                                </div>
-        
-                                                <div class="mb-3">
-                                                    <label for="confirmpassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                                                    <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror" id="confirmpassword"
-                                                    name="password_confirmation" placeholder="Enter Confirm password" autofocus required>
-                                                    @error('password_confirmation')
-                                                        <span class="invalid-feedback" role="alert">
-                                                            <strong>{{ $message }}</strong>
-                                                        </span>
-                                                    @enderror
-                                                </div>
-        
-                                                <div class="mb-3">
-                                                    <label for="avatar">Profile Picture <span class="text-danger">*</span></label>
-                                                    <div class="input-group">
-                                                        <input type="file" class="form-control @error('avatar') is-invalid @enderror" id="inputGroupFile02" name="avatar" autofocus required>
-                                                        <label class="input-group-text" for="inputGroupFile02">Upload</label>
-                                                    </div>
-                                                    @error('avatar')
-                                                        <span class="invalid-feedback" role="alert">
-                                                            <strong>{{ $message }}</strong>
-                                                        </span>
-                                                    @enderror
-                                                </div>
-        
-                                                <div class="mt-4 d-grid">
-                                                    <button class="btn btn-primary waves-effect waves-light"
-                                                        type="submit">Register</button>
-                                                </div>
-        
-                                                <div class="mt-4 text-center">
-                                                    <h5 class="font-size-14 mb-3">Sign up using</h5>
-        
-                                                    <ul class="list-inline">
-                                                        <li class="list-inline-item">
-                                                            <a href="#"
-                                                                class="social-list-item bg-primary text-white border-primary">
-                                                                <i class="mdi mdi-facebook"></i>
-                                                            </a>
-                                                        </li>
-                                                        <li class="list-inline-item">
-                                                            <a href="#"
-                                                                class="social-list-item bg-info text-white border-info">
-                                                                <i class="mdi mdi-twitter"></i>
-                                                            </a>
-                                                        </li>
-                                                        <li class="list-inline-item">
-                                                            <a href="#"
-                                                                class="social-list-item bg-danger text-white border-danger">
-                                                                <i class="mdi mdi-google"></i>
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-        
-                                                <div class="mt-4 text-center">
-                                                    <p class="mb-0">By registering you agree to the Skote <a href="#"
-                                                            class="text-primary">Terms of Use</a></p>
-                                                </div>
-                                            </form>
-
-                                            <div class="mt-3 text-center">
-                                                <p>Already have an account ? <a href="{{ url('login') }}"
-                                                        class="fw-medium text-primary"> Login</a> </p>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-4 mt-md-3 text-center">
-                                        <p class="mb-0">© <script>
-                                                document.write(new Date().getFullYear())
-
-                                            </script> Skote. Crafted with <i class="mdi mdi-heart text-danger"></i> by
-                                            Themesbrand</p>
-                                    </div>
-                                </div>
-
-
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end col -->
-                </div>
-                <!-- end row -->
-            </div>
-            <!-- end container-fluid -->
+        <div class="text-center mb-4">
+            <a href="{{ route('reservas.public.index') }}" class="mg-logo-text" style="font-size:1.6rem;">
+                Minigolf <span>Córdoba</span>
+            </a>
         </div>
 
-    @endsection
-    @section('script')
-        <script src="{{ URL::asset('build/libs/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
-        <!-- owl.carousel js -->
-        <script src="{{ URL::asset('build/libs/owl.carousel/owl.carousel.min.js') }}"></script>
-        <!-- auth-2-carousel init -->
-        <script src="{{ URL::asset('build/js/pages/auth-2-carousel.init.js') }}"></script>
-    @endsection
+        <div class="mg-reserva-card" style="margin:0; max-width:100%;">
+            <div class="mg-reserva-titulo" style="font-size:1.1rem; margin-bottom:1.25rem;">
+                <i class="bx bx-user-plus me-2"></i>Crear cuenta
+            </div>
+
+            <p style="font-size:.85rem; color:var(--mg-text-muted); margin-bottom:1.25rem;">
+                Con una cuenta puedes consultar y cancelar tus reservas en cualquier momento sin necesidad del enlace por email.
+            </p>
+
+            <form method="POST" action="{{ route('register') }}">
+                @csrf
+
+                <div class="mb-3">
+                    <label for="name" class="form-label" style="color:var(--mg-text-muted); font-size:.85rem;">
+                        Nombre <span class="text-danger">*</span>
+                    </label>
+                    <input type="text"
+                           name="name"
+                           id="name"
+                           class="form-control @error('name') is-invalid @enderror"
+                           value="{{ old('name') }}"
+                           placeholder="Tu nombre"
+                           autofocus
+                           style="background:var(--mg-dark-3); border-color:var(--mg-border); color:var(--mg-text);">
+                    @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label" style="color:var(--mg-text-muted); font-size:.85rem;">
+                        Email <span class="text-danger">*</span>
+                    </label>
+                    <input type="email"
+                           name="email"
+                           id="email"
+                           class="form-control @error('email') is-invalid @enderror"
+                           value="{{ old('email') }}"
+                           placeholder="tucorreo@ejemplo.com"
+                           style="background:var(--mg-dark-3); border-color:var(--mg-border); color:var(--mg-text);">
+                    @error('email')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label" style="color:var(--mg-text-muted); font-size:.85rem;">
+                        Contraseña <span class="text-danger">*</span>
+                    </label>
+                    <input type="password"
+                           name="password"
+                           id="password"
+                           class="form-control @error('password') is-invalid @enderror"
+                           placeholder="Mínimo 8 caracteres"
+                           style="background:var(--mg-dark-3); border-color:var(--mg-border); color:var(--mg-text);">
+                    @error('password')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label for="password_confirmation" class="form-label" style="color:var(--mg-text-muted); font-size:.85rem;">
+                        Repetir contraseña <span class="text-danger">*</span>
+                    </label>
+                    <input type="password"
+                           name="password_confirmation"
+                           id="password_confirmation"
+                           class="form-control"
+                           placeholder="Repite tu contraseña"
+                           style="background:var(--mg-dark-3); border-color:var(--mg-border); color:var(--mg-text);">
+                </div>
+
+                <button type="submit" class="btn btn-mg-primary w-100">
+                    Crear cuenta
+                </button>
+            </form>
+
+            <hr style="border-color:var(--mg-border); margin:1.25rem 0;">
+
+            <p class="text-center mb-0" style="font-size:.85rem; color:var(--mg-text-muted);">
+                ¿Ya tienes cuenta?
+                <a href="{{ route('login') }}" style="color:var(--mg-gold); text-decoration:none; font-weight:600;">Acceder</a>
+            </p>
+        </div>
+
+        <p class="text-center mt-3" style="font-size:.8rem; color:var(--mg-text-muted);">
+            <a href="{{ route('reservas.public.index') }}" style="color:var(--mg-text-muted); text-decoration:none;">
+                <i class="bx bx-arrow-back me-1"></i>Volver a reservas
+            </a>
+        </p>
+    </div>
+
+</body>
+</html>

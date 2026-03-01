@@ -45,6 +45,36 @@
     });
 </script>
 
+@hasanyrole('SuperAdmin|Admin')
+<script>
+    $('#switch-mantenimiento').on('change', function () {
+        var $switch = $(this);
+        var $label = $('#mantenimiento-label');
+        var $wrapper = $('#mantenimiento-toggle-wrapper');
+        $switch.prop('disabled', true);
+
+        $.ajax({
+            url: "{{ route('admin.mantenimiento.toggle') }}",
+            type: 'POST',
+            data: { '_token': "{{ csrf_token() }}" },
+            success: function (response) {
+                $switch.prop('disabled', false);
+                if (response.en_mantenimiento) {
+                    $label.removeClass('text-muted').addClass('text-warning').text('Mantenimiento');
+                    $wrapper.attr('title', 'Desactivar modo mantenimiento');
+                } else {
+                    $label.removeClass('text-warning').addClass('text-muted').text('Web pública');
+                    $wrapper.attr('title', 'Activar modo mantenimiento');
+                }
+            },
+            error: function () {
+                $switch.prop('checked', !$switch.prop('checked')).prop('disabled', false);
+            }
+        });
+    });
+</script>
+@endhasanyrole
+
 @yield('script')
 
 @stack('scripts')

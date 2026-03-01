@@ -1,122 +1,101 @@
-@extends('layouts.master-without-nav')
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Acceder | Minigolf Córdoba</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="Accede a tu cuenta para gestionar tus reservas en Minigolf Córdoba.">
+    <link rel="shortcut icon" href="{{ URL::asset('build/images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ URL::asset('build/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ URL::asset('build/css/icons.min.css') }}">
+    @vite(['resources/scss/custom/views/public-reservas.scss'])
+</head>
+<body class="mg-body d-flex align-items-center justify-content-center" style="min-height:100vh;">
 
-@section('title')
-@lang('translation.Login')
-@endsection
+    <div class="w-100" style="max-width:420px; padding:1.5rem;">
 
-@section('css')
-<!-- owl.carousel css -->
-    <link rel="stylesheet" href="{{ URL::asset('build/libs/owl.carousel/assets/owl.carousel.min.css') }}">
-    <link rel="stylesheet" href="{{ URL::asset('build/libs/owl.carousel/assets/owl.theme.default.min.css') }}">
-@endsection
-
-@section('body')
-
-<body class="auth-body-bg">
-    @endsection
-
-    @section('content')
-
-    <div>
-        <div class="container-fluid p-0">
-            <div class="row g-0">
-
-                <div class="col-xl-9">
-                    <div class="auth-full-bg pt-lg-5 p-4">
-                        <div class="w-100">
-                            <div class="bg-overlay"></div>
-                            
-                        </div>
-                    </div>
-                </div>
-                <!-- end col -->
-
-                <div class="col-xl-3">
-                    <div class="auth-full-page-content p-md-5 p-4">
-                        <div class="w-100">
-
-                            <div class="d-flex flex-column h-100">
-                                <div class="mb-4 mb-md-5">
-                                    <a href="index" class="d-block auth-logo">
-                                        <img src="{{ URL::asset('build/images/logo-dark.png') }}" alt="" height="18" class="auth-logo-dark">
-                                        <img src="{{ URL::asset('build/images/logo-light.png') }}" alt="" height="18" class="auth-logo-light">
-                                    </a>
-                                </div>
-                                <div class="my-auto">
-
-                                    <div>
-                                        <h5 class="text-primary">¡Bienvenido de nuevo!</h5>
-                                        <p class="text-muted">Valídate para continuar.</p>
-                                    </div>
-
-                                    <div class="mt-4">
-                                        <form class="form-horizontal" method="POST" action="{{ route('login') }}">
-                                            @csrf
-                                            <div class="mb-3">
-                                                <label for="username" class="form-label">Email <span class="text-danger">*</span></label>
-                                                <input name="email" type="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" id="username" placeholder="Enter Email" autocomplete="email" autofocus>
-                                                @error('email')
-                                                <span class="invalid-feedback" role="alert">
-                                                    <strong>{{ $message }}</strong>
-                                                </span>
-                                                @enderror
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <div class="float-end">
-                                                    @if (Route::has('password.request'))
-                                                    <a href="{{ route('password.request') }}" class="text-muted">¿Olvidaste tu contraseña?</a>
-                                                    @endif
-                                                </div>
-                                                <label class="form-label">Contraseña <span class="text-danger">*</span></label>
-                                                <div class="input-group auth-pass-inputgroup @error('password') is-invalid @enderror">
-                                                    <input type="password" name="password" class="form-control  @error('password') is-invalid @enderror" id="userpassword" value="" placeholder="Enter password" aria-label="Password" aria-describedby="password-addon">
-                                                    <button class="btn btn-light " type="button" id="password-addon"><i class="mdi mdi-eye-outline"></i></button>
-                                                    @error('password')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
-                                                    @enderror
-                                                </div>
-                                            </div>
-
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="remember">
-                                                    Recuérdame
-                                                </label>
-                                            </div>
-
-                                            <div class="mt-3 d-grid">
-                                                <button class="btn btn-primary waves-effect waves-light" type="submit">Entrar</button>
-                                            </div>                                            
-                                        </form>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4 mt-md-5 text-center">
-                                    <p class="mb-0">© <script>
-                                            document.write(new Date().getFullYear())
-                                        </script> TE2.0 Crafted with <i class="mdi mdi-heart text-danger"></i> by
-                                        Taller Empresarial 2.0.</p>
-                                </div>
-                            </div>
-
-
-                        </div>
-                    </div>
-                </div>
-                <!-- end col -->
-            </div>
-            <!-- end row -->
+        <div class="text-center mb-4">
+            <a href="{{ route('reservas.public.index') }}" class="mg-logo-text" style="font-size:1.6rem;">
+                Minigolf <span>Córdoba</span>
+            </a>
         </div>
-        <!-- end container-fluid -->
+
+        <div class="mg-reserva-card" style="margin:0; max-width:100%;">
+            <div class="mg-reserva-titulo" style="font-size:1.1rem; margin-bottom:1.25rem;">
+                <i class="bx bx-log-in me-2"></i>Acceder a tu cuenta
+            </div>
+
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
+
+                <div class="mb-3">
+                    <label for="email" class="form-label" style="color:var(--mg-text-muted); font-size:.85rem;">
+                        Email <span class="text-danger">*</span>
+                    </label>
+                    <input type="email"
+                           name="email"
+                           id="email"
+                           class="form-control @error('email') is-invalid @enderror"
+                           value="{{ old('email') }}"
+                           placeholder="tucorreo@ejemplo.com"
+                           autocomplete="email"
+                           autofocus
+                           style="background:var(--mg-dark-3); border-color:var(--mg-border); color:var(--mg-text);">
+                    @error('email')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label for="password" class="form-label mb-0" style="color:var(--mg-text-muted); font-size:.85rem;">
+                            Contraseña <span class="text-danger">*</span>
+                        </label>
+                        @if (Route::has('password.request'))
+                            <a href="{{ route('password.request') }}" style="font-size:.8rem; color:var(--mg-gold); text-decoration:none;">
+                                ¿Olvidaste tu contraseña?
+                            </a>
+                        @endif
+                    </div>
+                    <input type="password"
+                           name="password"
+                           id="password"
+                           class="form-control mt-1 @error('password') is-invalid @enderror"
+                           placeholder="Tu contraseña"
+                           autocomplete="current-password"
+                           style="background:var(--mg-dark-3); border-color:var(--mg-border); color:var(--mg-text);">
+                    @error('password')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                    <label class="form-check-label" for="remember" style="font-size:.85rem; color:var(--mg-text-muted);">
+                        Recordarme
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-mg-primary w-100">
+                    Entrar
+                </button>
+            </form>
+
+            <hr style="border-color:var(--mg-border); margin:1.25rem 0;">
+
+            <p class="text-center mb-0" style="font-size:.85rem; color:var(--mg-text-muted);">
+                ¿No tienes cuenta?
+                <a href="{{ route('register') }}" style="color:var(--mg-gold); text-decoration:none; font-weight:600;">Regístrate</a>
+            </p>
+        </div>
+
+        <p class="text-center mt-3" style="font-size:.8rem; color:var(--mg-text-muted);">
+            <a href="{{ route('reservas.public.index') }}" style="color:var(--mg-text-muted); text-decoration:none;">
+                <i class="bx bx-arrow-back me-1"></i>Volver a reservas
+            </a>
+        </p>
     </div>
 
-    @endsection
-    @section('script')
-    <!-- owl.carousel js -->
-    <script src="{{ URL::asset('build/libs/owl.carousel/owl.carousel.min.js') }}"></script>
-    <!-- auth-2-carousel init -->
-    <script src="{{ URL::asset('build/js/pages/auth-2-carousel.init.js') }}"></script>
-    @endsection
+</body>
+</html>

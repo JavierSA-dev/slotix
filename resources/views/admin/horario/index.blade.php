@@ -93,7 +93,7 @@
                         </div>
 
                         {{-- Aforo --}}
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label for="aforo_por_tramo" class="form-label fw-semibold">
                                 Aforo por tramo
                                 <small class="text-muted fw-normal">(máx. personas simultáneas)</small>
@@ -108,6 +108,44 @@
                             @error('aforo_por_tramo')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        {{-- Antelación mínima --}}
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <label for="horas_min_reserva" class="form-label fw-semibold">
+                                    Antelación mín. para reservar
+                                    <small class="text-muted fw-normal">(horas)</small>
+                                </label>
+                                <input type="number"
+                                       class="form-control @error('horas_min_reserva') is-invalid @enderror"
+                                       id="horas_min_reserva"
+                                       name="horas_min_reserva"
+                                       min="0"
+                                       max="72"
+                                       value="{{ $horario ? $horario->horas_min_reserva : 0 }}">
+                                <div class="form-text">0 = sin restricción</div>
+                                @error('horas_min_reserva')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="horas_min_cancelacion" class="form-label fw-semibold">
+                                    Antelación mín. para cancelar
+                                    <small class="text-muted fw-normal">(horas)</small>
+                                </label>
+                                <input type="number"
+                                       class="form-control @error('horas_min_cancelacion') is-invalid @enderror"
+                                       id="horas_min_cancelacion"
+                                       name="horas_min_cancelacion"
+                                       min="0"
+                                       max="72"
+                                       value="{{ $horario ? $horario->horas_min_cancelacion : 0 }}">
+                                <div class="form-text">0 = sin restricción</div>
+                                @error('horas_min_cancelacion')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary">

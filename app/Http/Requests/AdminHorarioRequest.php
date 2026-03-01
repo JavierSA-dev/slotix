@@ -28,6 +28,8 @@ class AdminHorarioRequest extends FormRequest
             'hora_cierre' => ['required', 'numeric', 'min:0', 'max:24', 'gt:hora_apertura'],
             'duracion_tramo' => ['required', 'integer', 'in:15,30,45,60,90,120'],
             'aforo_por_tramo' => ['required', 'integer', 'min:1', 'max:100'],
+            'horas_min_reserva' => ['required', 'integer', 'min:0', 'max:72'],
+            'horas_min_cancelacion' => ['required', 'integer', 'min:0', 'max:72'],
         ];
     }
 

@@ -27,7 +27,7 @@ Route::middleware(['throttle:password-reset'])->group(function () {
     Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
 
-Auth::routes(['verify' => true, 'register' => false]);
+Auth::routes(['verify' => true, 'register' => true]);
 
 // ─────────────────────────────────────────────────────────────────────────
 // RUTAS PÚBLICAS (sin autenticación)
@@ -61,9 +61,14 @@ Route::middleware(['auth', 'active'])->group(function () {
     // ─────────────────────────────────────────────────────────────────────────
     Route::middleware(['es_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::post('/mantenimiento/toggle', [AdminDashboardController::class, 'toggleMantenimiento'])->name('mantenimiento.toggle');
         Route::get('/horario', [AdminHorarioController::class, 'index'])->name('horario.index');
         Route::put('/horario', [AdminHorarioController::class, 'update'])->name('horario.update');
         Route::get('/reservas/get-ajax', [AdminReservasController::class, 'getAjax'])->name('reservas.getAjax');
+        Route::get('/reservas/calendar-events', [AdminReservasController::class, 'calendarEvents'])->name('reservas.calendarEvents');
+        Route::post('/reservas', [AdminReservasController::class, 'storeAdmin'])->name('reservas.store');
+        Route::patch('/reservas/{reserva}/confirmar', [AdminReservasController::class, 'confirmar'])->name('reservas.confirmar');
+        Route::patch('/reservas/{reserva}/cancelar-admin', [AdminReservasController::class, 'cancelarAdmin'])->name('reservas.cancelarAdmin');
         Route::get('/reservas', [AdminReservasController::class, 'index'])->name('reservas.index');
     });
 

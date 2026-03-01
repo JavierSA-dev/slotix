@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CrearReservaRequest;
 use App\Mail\ReservaCanceladaMail;
 use App\Mail\ReservaConfirmadaMail;
-use App\Models\HorarioConfig;
 use App\Models\Reserva;
 use App\Services\ReservaService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
@@ -21,12 +21,16 @@ class ReservaPublicaController extends Controller
     /**
      * Vista pública del calendario (próximos 14 días hábiles).
      */
-    public function index(): View
+    public function index(): View|RedirectResponse
     {
-        $horario = $this->reservaService->getHorarioActivo();
-        $fechas = $this->generarProximas14Fechas($horario);
+        if (auth()->check() && auth()->user()->hasAnyRole(['SuperAdmin', 'Admin'])) {
+            return redirect()->route('admin.dashboard');
+        }
 
-        return view('reservas.public.index', compact('horario', 'fechas'));
+        $horario = $this->reservaService->getHorarioActivo();
+        $diasHabiles = $horario ? $horario->dias_semana : [0, 1, 2, 3, 4, 5, 6];
+
+        return view('reservas.public.index', compact('horario', 'diasHabiles'));
     }
 
     /**
@@ -60,7 +64,7 @@ class ReservaPublicaController extends Controller
         Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada));
 
         return response()->json([
-            'message' => '¡Reserva confirmada! Te hemos enviado un email con los detalles.',
+            'message' => '¡Reserva recibida! En breve recibirás un email de confirmación.',
             'token' => $reserva->token,
             'url' => route('reservas.show', $reserva->token),
         ]);
@@ -89,6 +93,22 @@ class ReservaPublicaController extends Controller
             return response()->json(['message' => 'Esta reserva ya estaba cancelada.'], 422);
         }
 
+        $horario = $this->reservaService->getHorarioActivo();
+        if ($horario && $horario->horas_min_cancelacion > 0) {
+            $horaInicioDecimal = (float) $reserva->hora_inicio;
+            $horaInicioH = (int) $horaInicioDecimal;
+            $horaInicioM = (int) round(($horaInicioDecimal - $horaInicioH) * 60);
+            $fechaHoraReserva = Carbon::parse($reserva->fecha->format('Y-m-d'))
+                ->setTime($horaInicioH, $horaInicioM);
+            $limiteAntelacion = $fechaHoraReserva->copy()->subHours($horario->horas_min_cancelacion);
+
+            if (Carbon::now()->isAfter($limiteAntelacion)) {
+                return response()->json([
+                    'message' => "No es posible cancelar con menos de {$horario->horas_min_cancelacion} hora(s) de antelación.",
+                ], 422);
+            }
+        }
+
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
 
         $this->reservaService->cancelarReserva($reserva);
@@ -102,8 +122,9 @@ class ReservaPublicaController extends Controller
      *
      * @return array<int, array{valor: string, etiqueta: string, dia_nombre: string}>
      */
-    private function generarProximas14Fechas(?HorarioConfig $horario): array
+    private function generarProximas14Fechas(): array
     {
+        $horario = $this->reservaService->getHorarioActivo();
         $diasHabiles = $horario ? $horario->dias_semana : [0, 1, 2, 3, 4, 5, 6];
         $nombresDias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
         $fechas = [];

@@ -27,6 +27,24 @@
         </div>
 
         <div class="d-flex">
+            {{-- TOGGLE - Mantenimiento (solo admins) --}}
+            @hasanyrole('SuperAdmin|Admin')
+            <div class="d-flex align-items-center px-2" id="mantenimiento-toggle-wrapper"
+                 title="{{ $enMantenimiento ? 'Desactivar modo mantenimiento' : 'Activar modo mantenimiento' }}">
+                <span class="d-none d-xl-inline-block me-2 font-size-13 text-{{ $enMantenimiento ? 'warning' : 'muted' }}" id="mantenimiento-label">
+                    {{ $enMantenimiento ? 'Mantenimiento' : 'Web pública' }}
+                </span>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           role="switch"
+                           id="switch-mantenimiento"
+                           style="width:2.2em; height:1.2em; cursor:pointer;"
+                           {{ $enMantenimiento ? 'checked' : '' }}>
+                </div>
+            </div>
+            @endhasanyrole
+
             {{-- DROPDOWN - Usuario --}}
             <div class="dropdown d-inline-block">
                 <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"

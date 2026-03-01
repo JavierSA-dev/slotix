@@ -36,7 +36,8 @@ export default vite.defineConfig({
                     'resources/js/components/yajra-datatable.js',
                     'resources/js/components/crud-modal.js',
                     'resources/scss/custom/views/public-reservas.scss',
-                    'resources/js/pages/reservas-public.js'
+                    'resources/js/pages/reservas-public.js',
+                    'resources/js/pages/admin-dashboard.js'
                 ],
                 refresh: true,                
             }
