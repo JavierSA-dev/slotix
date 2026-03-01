@@ -21,7 +21,23 @@
       "Bash(composer show --direct)",
       "Bash(php artisan make:migration create_horario_config_table --no-interaction)",
       "Bash(php artisan make:migration create_reservas_table --no-interaction)",
-      "Bash(php artisan migrate --no-interaction)"
+      "Bash(php artisan migrate --no-interaction)",
+      "Bash(php artisan make:model HorarioConfig --no-interaction)",
+      "Bash(php artisan make:model Reserva --no-interaction)",
+      "Bash(php artisan make:seeder HorarioConfigSeeder --no-interaction)",
+      "Bash(php artisan make:middleware EsAdmin --no-interaction)",
+      "Bash(php artisan make:class Services/ReservaService --no-interaction)",
+      "Bash(php artisan make:request CrearReservaRequest --no-interaction)",
+      "Bash(php artisan make:request AdminHorarioRequest --no-interaction)",
+      "Bash(php artisan make:mail ReservaConfirmadaMail --no-interaction)",
+      "Bash(php artisan make:mail ReservaCanceladaMail --no-interaction)",
+      "Bash(php artisan make:controller ReservaPublicaController --no-interaction)",
+      "Bash(php artisan make:controller MisReservasController --no-interaction)",
+      "Bash(php artisan make:controller Admin/AdminDashboardController --no-interaction)",
+      "Bash(php artisan make:controller Admin/AdminHorarioController --no-interaction)",
+      "Bash(php artisan make:controller Admin/AdminReservasController --no-interaction)",
+      "Bash(php artisan db:seed --class=HorarioConfigSeeder --no-interaction)",
+      "Bash(npm install)"
     ]
   }
 }

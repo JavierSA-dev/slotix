@@ -1,0 +1,415 @@
+// ═══════════════════════════════════════════════════════
+// Minigolf Córdoba – Vista pública de reservas
+// ═══════════════════════════════════════════════════════
+
+// Variables de marca
+:root {
+    --mg-dark:       #0d1a0d;
+    --mg-dark-2:     #162316;
+    --mg-dark-3:     #1e301e;
+    --mg-gold:       #c69444;
+    --mg-gold-dim:   #977032;
+    --mg-green:      #2a5228;
+    --mg-green-light:#3a7038;
+    --mg-text:       #e8dcc8;
+    --mg-text-muted: #9a8870;
+    --mg-border:     rgba(198, 148, 68, 0.2);
+}
+
+// Reset base
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+// Body
+.mg-body {
+    background-color: var(--mg-dark);
+    color: var(--mg-text);
+    min-height: 100vh;
+    font-family: 'Source Sans Pro', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+}
+
+// ─── HEADER ─────────────────────────────────────────────
+.mg-header {
+    background: var(--mg-dark-2);
+    border-bottom: 2px solid var(--mg-gold-dim);
+    padding: 1rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    .mg-logo-text {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--mg-gold);
+        letter-spacing: 0.05em;
+        text-decoration: none;
+
+        span {
+            color: var(--mg-text);
+            font-weight: 300;
+        }
+    }
+
+    .mg-nav-links {
+        a {
+            color: var(--mg-text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+
+            &:hover {
+                color: var(--mg-gold);
+            }
+        }
+    }
+}
+
+// ─── MAIN ────────────────────────────────────────────────
+.mg-main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+}
+
+// ─── TÍTULO SECCIÓN ──────────────────────────────────────
+.mg-section-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--mg-gold);
+    margin-bottom: 0.25rem;
+
+    small {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 400;
+        color: var(--mg-text-muted);
+        margin-top: 0.1rem;
+    }
+}
+
+// ─── CARRUSEL DE FECHAS ──────────────────────────────────
+.fecha-selector {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--mg-gold-dim) var(--mg-dark-3);
+
+    &::-webkit-scrollbar {
+        height: 4px;
+    }
+    &::-webkit-scrollbar-track {
+        background: var(--mg-dark-3);
+    }
+    &::-webkit-scrollbar-thumb {
+        background: var(--mg-gold-dim);
+        border-radius: 2px;
+    }
+}
+
+.fecha-pill {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    background: var(--mg-dark-3);
+    border: 1px solid var(--mg-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 72px;
+    color: var(--mg-text-muted);
+    font-size: 0.85rem;
+    line-height: 1.3;
+    white-space: nowrap;
+
+    .fecha-pill-dia {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .fecha-pill-num {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--mg-text);
+    }
+
+    &:hover {
+        border-color: var(--mg-gold-dim);
+        color: var(--mg-text);
+    }
+
+    &.active {
+        background: var(--mg-gold);
+        border-color: var(--mg-gold);
+        color: #0d1a0d;
+
+        .fecha-pill-num {
+            color: #0d1a0d;
+        }
+    }
+}
+
+// ─── GRID DE FRANJAS ─────────────────────────────────────
+.franjas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.75rem;
+
+    @media (max-width: 480px) {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    }
+}
+
+.franja-card {
+    background: var(--mg-green);
+    border: 1px solid rgba(58, 112, 56, 0.5);
+    border-radius: 10px;
+    padding: 1rem 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+
+    .franja-hora {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .franja-aforo {
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.7);
+        margin-top: 0.2rem;
+    }
+
+    &:hover {
+        background: var(--mg-green-light);
+        border-color: var(--mg-gold);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    &.llena {
+        background: #1a1a1a;
+        border-color: #333;
+        cursor: not-allowed;
+        opacity: 0.6;
+
+        .franja-hora {
+            color: #666;
+        }
+
+        .franja-aforo {
+            color: #555;
+        }
+
+        &:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: #333;
+        }
+    }
+}
+
+// ─── ESTADO VACÍO / LOADING ──────────────────────────────
+.mg-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--mg-text-muted);
+
+    .mg-empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.4;
+    }
+}
+
+.mg-loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--mg-gold);
+
+    .spinner-border {
+        width: 2rem;
+        height: 2rem;
+        border-color: var(--mg-gold);
+        border-right-color: transparent;
+    }
+}
+
+// ─── MODAL DE RESERVA ────────────────────────────────────
+.mg-modal .modal-content {
+    background: var(--mg-dark-2);
+    border: 1px solid var(--mg-border);
+    color: var(--mg-text);
+    border-radius: 12px;
+}
+
+.mg-modal .modal-header {
+    border-bottom-color: var(--mg-border);
+
+    .modal-title {
+        color: var(--mg-gold);
+        font-weight: 700;
+    }
+
+    .btn-close {
+        filter: invert(1) sepia(1) saturate(2) hue-rotate(10deg);
+        opacity: 0.7;
+    }
+}
+
+.mg-modal .modal-footer {
+    border-top-color: var(--mg-border);
+}
+
+.mg-franja-seleccionada {
+    background: var(--mg-dark-3);
+    border: 1px solid var(--mg-border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .mg-franja-hora {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--mg-gold);
+    }
+
+    .mg-franja-info {
+        font-size: 0.85rem;
+        color: var(--mg-text-muted);
+    }
+}
+
+// Inputs en modo oscuro
+.mg-modal .form-control,
+.mg-modal .form-select {
+    background: var(--mg-dark-3);
+    border-color: var(--mg-border);
+    color: var(--mg-text);
+
+    &:focus {
+        background: var(--mg-dark-3);
+        border-color: var(--mg-gold-dim);
+        color: var(--mg-text);
+        box-shadow: 0 0 0 0.2rem rgba(198,148,68,0.2);
+    }
+
+    &::placeholder {
+        color: var(--mg-text-muted);
+    }
+}
+
+.mg-modal label {
+    color: var(--mg-text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+}
+
+// Textarea siempre sin resize
+textarea {
+    resize: none;
+}
+
+// Botón dorado principal
+.btn-mg-primary {
+    background: var(--mg-gold);
+    border-color: var(--mg-gold);
+    color: #0d1a0d;
+    font-weight: 700;
+
+    &:hover {
+        background: var(--mg-gold-dim);
+        border-color: var(--mg-gold-dim);
+        color: #0d1a0d;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+    }
+}
+
+// ─── VISTA DETALLE RESERVA ───────────────────────────────
+.mg-reserva-card {
+    background: var(--mg-dark-2);
+    border: 1px solid var(--mg-border);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 500px;
+    margin: 2rem auto;
+
+    .mg-reserva-titulo {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--mg-gold);
+        margin-bottom: 1.5rem;
+    }
+
+    .mg-reserva-campo {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--mg-border);
+
+        &:last-of-type {
+            border-bottom: none;
+        }
+
+        .campo-label {
+            font-size: 0.85rem;
+            color: var(--mg-text-muted);
+        }
+
+        .campo-valor {
+            font-weight: 600;
+            color: var(--mg-text);
+        }
+    }
+}
+
+// Badge de estado
+.mg-estado {
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.8rem;
+    font-weight: 600;
+
+    &.confirmada { background: rgba(40,167,69,0.2); color: #5cb85c; }
+    &.pendiente  { background: rgba(255,193,7,0.2); color: #ffc107; }
+    &.cancelada  { background: rgba(220,53,69,0.2); color: #dc3545; }
+}
+
+// ─── ALERTA DE ÉXITO POST-RESERVA ────────────────────────
+.mg-success-box {
+    background: rgba(42, 82, 40, 0.3);
+    border: 1px solid var(--mg-green-light);
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    margin-top: 1rem;
+
+    .mg-success-icon {
+        font-size: 2.5rem;
+        color: #5cb85c;
+        margin-bottom: 0.75rem;
+    }
+
+    a {
+        color: var(--mg-gold);
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}

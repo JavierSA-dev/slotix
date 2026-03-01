@@ -1,55 +1,74 @@
 <?php
 
-use App\Http\Controllers\Auth\{LoginController, RegisterController, ForgotPasswordController, ResetPasswordController};
-use App\Http\Controllers\{HomeController, PermissionController, RoleController, UserController};
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminHorarioController;
+use App\Http\Controllers\Admin\AdminReservasController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MisReservasController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ReservaPublicaController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // ─────────────────────────────────────────────────────────────────────────
-// RUTAS DE AUTENTICACIÓN CON RATE LIMITING
+// AUTENTICACIÓN CON RATE LIMITING
 // ─────────────────────────────────────────────────────────────────────────
-
-// Login: 5 intentos por minuto (previene fuerza bruta)
 Route::middleware(['throttle:login'])->group(function () {
     Route::post('login', [LoginController::class, 'login'])->name('login.post');
 });
 
-// Registro: 3 por hora (previene creación masiva de cuentas)
-// POR DEFECTO LA HE COMENTADO PORQUE NO SOLEMOS HACER APPS CON REGISTRO PÚBLICO
-// Route::middleware(['throttle:register'])->group(function () {
-//     Route::post('register', [RegisterController::class, 'register'])->name('register.post');
-// });
-
-// Reset de contraseña: 3 por hora (previene abuso)
 Route::middleware(['throttle:password-reset'])->group(function () {
     Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
     Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
 
-// Resto de rutas de autenticación (vistas GET, logout, etc.) - sin rate limiting agresivo
-Auth::routes(['verify' => true]);
+Auth::routes(['verify' => true, 'register' => false]);
 
-// Agrupamos todas las rutas que requieren autenticación
+// ─────────────────────────────────────────────────────────────────────────
+// RUTAS PÚBLICAS (sin autenticación)
+// ─────────────────────────────────────────────────────────────────────────
+Route::get('/', [ReservaPublicaController::class, 'index'])->name('reservas.public.index');
+Route::get('/reservas/franjas', [ReservaPublicaController::class, 'franjas'])->name('reservas.franjas');
+Route::post('/reservas', [ReservaPublicaController::class, 'store'])->name('reservas.store');
+Route::get('/reservas/{token}', [ReservaPublicaController::class, 'show'])->name('reservas.show');
+Route::patch('/reservas/{token}/cancelar', [ReservaPublicaController::class, 'cancelar'])->name('reservas.cancelar');
+
+// ─────────────────────────────────────────────────────────────────────────
+// RUTAS AUTENTICADAS
+// ─────────────────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/home', [HomeController::class, 'root'])->name('home');
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // RUTAS PUBLICAS (cualquier usuario autenticado)
-    // ─────────────────────────────────────────────────────────────────────────
-    Route::get('/', [HomeController::class, 'root'])->name('root');
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
-
-    // Perfil del usuario
     Route::post('/update-profile/{id}', [HomeController::class, 'updateProfile'])->name('updateProfile');
     Route::post('/update-password/{id}', [HomeController::class, 'updatePassword'])->name('updatePassword');
 
-    Route::get('index/{locale}', [HomeController::class, 'lang']);
-
-    // Páginas del sistema
-    Route::get('mantenimiento/maintenance', fn() => view('mantenimiento.maintenance'))->name('mantenimiento');
-    Route::get('mantenimiento/comingsoon', fn() => view('mantenimiento.comingsoon'))->name('comingsoon');
+    Route::get('mantenimiento/maintenance', fn () => view('mantenimiento.maintenance'))->name('mantenimiento');
+    Route::get('mantenimiento/comingsoon', fn () => view('mantenimiento.comingsoon'))->name('comingsoon');
 
     // ─────────────────────────────────────────────────────────────────────────
-    // RUTAS ADMIN 
+    // MIS RESERVAS (usuario autenticado)
+    // ─────────────────────────────────────────────────────────────────────────
+    Route::get('/mis-reservas', [MisReservasController::class, 'index'])->name('mis-reservas.index');
+    Route::patch('/mis-reservas/{reserva}/cancelar', [MisReservasController::class, 'cancelar'])->name('mis-reservas.cancelar');
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // PANEL ADMIN
+    // ─────────────────────────────────────────────────────────────────────────
+    Route::middleware(['es_admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/horario', [AdminHorarioController::class, 'index'])->name('horario.index');
+        Route::put('/horario', [AdminHorarioController::class, 'update'])->name('horario.update');
+        Route::get('/reservas/get-ajax', [AdminReservasController::class, 'getAjax'])->name('reservas.getAjax');
+        Route::get('/reservas', [AdminReservasController::class, 'index'])->name('reservas.index');
+    });
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GESTIÓN DE USUARIOS
     // ─────────────────────────────────────────────────────────────────────────
     Route::middleware(['permission:users.index'])->group(function () {
         Route::get('users/export', [UserController::class, 'export'])->name('users.export');
@@ -58,19 +77,15 @@ Route::middleware(['auth', 'active'])->group(function () {
     });
 
     // ─────────────────────────────────────────────────────────────────────────
-    // RUTAS SUPERADMIN
+    // SUPERADMIN
     // ─────────────────────────────────────────────────────────────────────────
     Route::middleware(['role:SuperAdmin'])->group(function () {
-        // Roles
         Route::get('roles/get-ajax', [RoleController::class, 'getAjax'])->name('roles.getAjax');
         Route::get('roles/get-permissions/{id}', [RoleController::class, 'getPermissions'])->name('roles.getPermissions');
         Route::get('roles/roles-ajax', [RoleController::class, 'getRolesAjax'])->name('roles.rolesAjax');
         Route::resource('roles', RoleController::class);
 
-        // Permisos
         Route::get('permissions/get-ajax', [PermissionController::class, 'getAjax'])->name('permissions.getAjax');
         Route::resource('permissions', PermissionController::class);
     });
 });
-
-Auth::routes();

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
 
 class HomeController extends Controller
@@ -31,25 +31,17 @@ class HomeController extends Controller
         if (view()->exists($request->path())) {
             return view($request->path());
         }
+
         return abort(404);
     }
 
-    public function root()
+    public function root(): RedirectResponse
     {
-        return view('index');
-    }
-
-    /*Language Translation*/
-    public function lang($locale)
-    {
-        if ($locale) {
-            App::setLocale($locale);
-            Session::put('lang', $locale);
-            Session::save();
-            return redirect()->back()->with('locale', $locale);
-        } else {
-            return redirect()->back();
+        if (auth()->user()->hasAnyRole(['SuperAdmin', 'Admin'])) {
+            return redirect()->route('admin.dashboard');
         }
+
+        return redirect()->route('mis-reservas.index');
     }
 
     public function updateProfile(Request $request, $id)
@@ -71,15 +63,15 @@ class HomeController extends Controller
             $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             $mimeType = $avatar->getMimeType();
 
-            if (!in_array($mimeType, $allowedMimeTypes)) {
+            if (! in_array($mimeType, $allowedMimeTypes)) {
                 return response()->json([
                     'isSuccess' => false,
-                    'Message' => __('messages.invalid_image_format')
+                    'Message' => __('messages.invalid_image_format'),
                 ], 422);
             }
 
             // Extensión segura basada en MIME type real
-            $safeExtension = match($mimeType) {
+            $safeExtension = match ($mimeType) {
                 'image/jpeg' => 'jpg',
                 'image/png' => 'png',
                 'image/gif' => 'gif',
@@ -87,31 +79,33 @@ class HomeController extends Controller
                 default => 'jpg'
             };
 
-            $avatarName = time() . '_' . uniqid() . '.' . $safeExtension;
+            $avatarName = time().'_'.uniqid().'.'.$safeExtension;
             $avatarPath = public_path('/images/');
 
-            if (!file_exists($avatarPath)) {
+            if (! file_exists($avatarPath)) {
                 mkdir($avatarPath, 0755, true);
             }
 
             $avatar->move($avatarPath, $avatarName);
-            $user->avatar = '/images/' . $avatarName;
+            $user->avatar = '/images/'.$avatarName;
         }
 
         $user->update();
         if ($user) {
             Session::flash('message', 'User Details Updated successfully!');
             Session::flash('alert-class', 'alert-success');
+
             return response()->json([
                 'isSuccess' => true,
-                'Message' => "User Details Updated successfully!"
+                'Message' => 'User Details Updated successfully!',
             ], 200);
         } else {
             Session::flash('message', 'Something went wrong!');
             Session::flash('alert-class', 'alert-danger');
+
             return response()->json([
                 'isSuccess' => false,
-                'Message' => "Something went wrong!"
+                'Message' => 'Something went wrong!',
             ], 500);
         }
     }
@@ -123,10 +117,10 @@ class HomeController extends Controller
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
 
-        if (!(Hash::check($request->get('current_password'), Auth::user()->password))) {
+        if (! (Hash::check($request->get('current_password'), Auth::user()->password))) {
             return response()->json([
                 'isSuccess' => false,
-                'Message' => "Your Current password does not matches with the password you provided. Please try again."
+                'Message' => 'Your Current password does not matches with the password you provided. Please try again.',
             ], 401); // 401 Unauthorized - credenciales incorrectas
         } else {
             $user = User::find($id);
@@ -135,16 +129,18 @@ class HomeController extends Controller
             if ($user) {
                 Session::flash('message', 'Password updated successfully!');
                 Session::flash('alert-class', 'alert-success');
+
                 return response()->json([
                     'isSuccess' => true,
-                    'Message' => "Password updated successfully!"
+                    'Message' => 'Password updated successfully!',
                 ], 200);
             } else {
                 Session::flash('message', 'Something went wrong!');
                 Session::flash('alert-class', 'alert-danger');
+
                 return response()->json([
                     'isSuccess' => false,
-                    'Message' => "Something went wrong!"
+                    'Message' => 'Something went wrong!',
                 ], 500); // 500 Internal Server Error
             }
         }
