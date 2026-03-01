@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+#
+# post-commit hook: Publicación automática de versiones TE 2.0
+#
+# Uso (desde cualquier rama → solo se ejecuta si estás en main/master):
+#   git commit --allow-empty -m "release:patch"   → 1.0.0 → 1.0.1
+#   git commit --allow-empty -m "release:minor"   → 1.0.0 → 1.1.0
+#   git commit --allow-empty -m "release:major"   → 1.0.0 → 2.0.0
+#   git commit --allow-empty -m "release:1.5.0"   → versión exacta
+#
+# El commit queda enmendado como "chore(release): vX.Y.Z" + tag git.
+
+LOCK_FILE=".git/.release-in-progress"
+
+# ── Evitar recursión (el --amend también dispara post-commit) ───────────────
+if [ -f "$LOCK_FILE" ]; then
+    exit 0
+fi
+
+# ── Detectar patrón de release en el mensaje del commit ─────────────────────
+COMMIT_MSG=$(git log -1 --pretty=%s)
+
+if [[ "$COMMIT_MSG" =~ ^release:[[:space:]]*(patch|minor|major|[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+    RELEASE_TYPE="${BASH_REMATCH[1]}"
+else
+    exit 0
+fi
+
+# ── Protección de rama: solo en main o master ───────────────────────────────
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+RELEASE_BRANCHES=("main" "master")
+
+ALLOWED=false
+for BRANCH in "${RELEASE_BRANCHES[@]}"; do
+    if [ "$CURRENT_BRANCH" = "$BRANCH" ]; then
+        ALLOWED=true
+        break
+    fi
+done
+
+if [ "$ALLOWED" = false ]; then
+    echo ""
+    echo "⚠️  release:${RELEASE_TYPE} ignorado — los releases solo se publican desde 'main'."
+    echo "   Rama actual: ${CURRENT_BRANCH}"
+    echo "   Fusiona tu rama a main primero y repite el commit de release."
+    echo ""
+    exit 0
+fi
+
+# ── Localizar PHP ────────────────────────────────────────────────────────────
+if command -v php &>/dev/null; then
+    PHP="php"
+elif [ -f "/c/xampp/php/php.exe" ]; then
+    PHP="/c/xampp/php/php.exe"
+elif [ -f "/d/xampp/php/php.exe" ]; then
+    PHP="/d/xampp/php/php.exe"
+else
+    echo ""
+    echo "⚠️  PHP no encontrado en PATH. Ejecuta manualmente: php artisan project:release"
+    exit 0
+fi
+
+# ── Construir flag ───────────────────────────────────────────────────────────
+case "$RELEASE_TYPE" in
+    patch) FLAG="--patch" ;;
+    minor) FLAG="--minor" ;;
+    major) FLAG="--major" ;;
+    *)     FLAG="--semver=$RELEASE_TYPE" ;;
+esac
+
+echo ""
+echo "╔═══════════════════════════════════════════════════════════╗"
+echo "║           TALLER EMPRESARIAL 2.0 - AUTO RELEASE           ║"
+echo "╚═══════════════════════════════════════════════════════════╝"
+echo ""
+echo "  Rama:            ${CURRENT_BRANCH}"
+echo "  Tipo de release: ${RELEASE_TYPE}"
+echo ""
+
+# ── Ejecutar ─────────────────────────────────────────────────────────────────
+touch "$LOCK_FILE"
+
+$PHP artisan project:release $FLAG --amend --no-interaction
+EXIT_CODE=$?
+
+rm -f "$LOCK_FILE"
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "❌ Error al procesar el release (código: $EXIT_CODE)"
+    echo "   Puedes ejecutarlo manualmente: php artisan project:release"
+    exit 0
+fi

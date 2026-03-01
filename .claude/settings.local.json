@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for lib in bootstrap-editable bootstrap-filestyle2 bootstrap-maxlength bootstrap-rating bootstrap-timepicker chance chart.js datatables.net-autofill datatables.net-autofill-bs4 datatables.net-keytable datatables.net-keytable-bs4 datatables.net-select datatables.net-select-bs4 dropzone echarts flot.curvedlines flot-charts fullcalendar gmaps gulp-rtlcss inputmask ion-rangeslider jquery.easing jquery.flot.tooltip jquery.repeater jquery-knob jquery-sparkline jquery-steps jquery-ui-dist jquery-validation jszip leaflet magnific-popup masonry-layout parsleyjs pdfmake spectrum-colorpicker2 sweetalert2 table-edits tinymce toastr tui-calendar tui-chart tui-date-picker tui-dom tui-time-picker)",
+      "Bash(do if [ -d \"$lib\" ])",
+      "Bash(then mv \"$lib\" ../libs-unused/)",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(php artisan test:*)",
+      "Bash(vendor/bin/pint --dirty --format agent)",
+      "Bash(vendor/bin/pint resources/views/users/partials/modal.blade.php --format agent)",
+      "Bash(vendor/bin/pint app/Http/Controllers/RoleController.php app/Http/Requests/RoleRequest.php app/DataTables/RoleDataTableConfig.php --format agent)",
+      "Bash(git stash)",
+      "Bash(git stash pop)",
+      "mcp__laravel-boost__tinker",
+      "Bash(npm run build)",
+      "Bash(vendor/bin/pint app/Http/Controllers/PermissionController.php app/Http/Requests/PermissionRequest.php app/DataTables/PermissionDataTableConfig.php --format agent)",
+      "Bash(vendor/bin/pint app/Console/Commands/EditCrud.php --format agent)",
+      "Bash(vendor/bin/pint app/Console/Commands/MakeCrud.php --format agent)"
+    ]
+  }
+}
