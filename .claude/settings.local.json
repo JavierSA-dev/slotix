@@ -16,7 +16,9 @@
       "Bash(npm run build)",
       "Bash(vendor/bin/pint app/Http/Controllers/PermissionController.php app/Http/Requests/PermissionRequest.php app/DataTables/PermissionDataTableConfig.php --format agent)",
       "Bash(vendor/bin/pint app/Console/Commands/EditCrud.php --format agent)",
-      "Bash(vendor/bin/pint app/Console/Commands/MakeCrud.php --format agent)"
+      "Bash(vendor/bin/pint app/Console/Commands/MakeCrud.php --format agent)",
+      "WebFetch(domain:www.minigolfcordoba.es)",
+      "Bash(composer show --direct)"
     ]
   }
 }
