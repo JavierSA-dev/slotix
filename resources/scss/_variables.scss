@@ -10,7 +10,7 @@ $sidebar-menu-item-color:                             #545a6d;
 $sidebar-menu-sub-item-color:                         #545a6d;
 $sidebar-menu-item-icon-color:                        #7f8387;
 $sidebar-menu-item-hover-color:                       #383c40;
-$sidebar-menu-item-active-color:                      #556ee6;
+$sidebar-menu-item-active-color:                      #c19849;
 $sidebar-width:                                       250px;
 $sidebar-collapsed-width:                             70px;
 $sidebar-width-sm:                                    160px;
@@ -21,7 +21,7 @@ $sidebar-dark-menu-item-color:                        #b6bcce;
 $sidebar-dark-menu-sub-item-color:                    #8e919b;
 $sidebar-dark-menu-item-icon-color:                   #6a7187;
 $sidebar-dark-menu-item-hover-color:                  #ffffff;
-$sidebar-dark-menu-item-active-color:                 #ffffff;
+$sidebar-dark-menu-item-active-color:                 #c19849;
 
 // Topbar - Default Light
 $header-height:                                       70px;
@@ -44,7 +44,7 @@ $footer-color:                                        #74788d;
 $topnav-bg:                                           $white;
 
 $menu-item-color:                                     #60636b;
-$menu-item-active-color:                              #FA9914;
+$menu-item-active-color:                              #c19849;
 
 // Right Sidebar
 $rightbar-width:                                      280px;
@@ -139,8 +139,8 @@ $colors: (
 
 // scss-docs-start theme-color-variables
 //$primary:       $blue;
-$primary: #343a40; //TE2.0 la linea anterior es el azul normal de bootstrap, pero lo ideal es personalizar con un color del cliente oscuro siempre
-$secondary:     $gray-600;
+$primary: #c19849; //TE2.0 color dorado de marca Minigolf Córdoba
+$secondary:     #535353;
 $success:       $green;
 $info:          $cyan;
 $warning:       $yellow;

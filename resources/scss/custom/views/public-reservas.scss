@@ -1,20 +1,26 @@
 // ═══════════════════════════════════════════════════════
 // Minigolf Córdoba – Vista pública de reservas
+// Estética: madera oscura cálida + neones
 // ═══════════════════════════════════════════════════════
 
 // Variables de marca
 :root {
-    --mg-dark:       #0d1a0d;
-    --mg-dark-2:     #162316;
-    --mg-dark-3:     #1e301e;
-    --mg-gold:       #c19849;
-    --mg-gold-dim:   #977032;
-    --mg-gray:       #535353;
-    --mg-green:      #2a5228;
-    --mg-green-light:#3a7038;
-    --mg-text:       #e8dcc8;
-    --mg-text-muted: #9a8870;
-    --mg-border:     rgba(193, 152, 73, 0.2);
+    --mg-dark:        #120d02;
+    --mg-dark-2:      #1c1505;
+    --mg-dark-3:      #251d08;
+    --mg-gold:        #c19849;
+    --mg-gold-dim:    #977032;
+    --mg-gold-glow:   rgba(193, 152, 73, 0.5);
+    --mg-gray:        #535353;
+    --mg-neon-cyan:   #00d4e8;
+    --mg-neon-lime:   #c8df00;
+    --mg-neon-cyan-glow: rgba(0, 212, 232, 0.35);
+    --mg-neon-lime-glow: rgba(200, 223, 0, 0.35);
+    --mg-text:        #f0e4cc;
+    --mg-text-muted:  #a89070;
+    --mg-border:      rgba(193, 152, 73, 0.22);
+    --mg-green:       #1a3818;
+    --mg-green-light: #254f23;
 }
 
 // Reset base
@@ -25,6 +31,9 @@
 // Body
 .mg-body {
     background-color: var(--mg-dark);
+    background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(0, 212, 232, 0.04) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(200, 223, 0, 0.04) 0%, transparent 60%);
     color: var(--mg-text);
     min-height: 100vh;
     font-family: 'Source Sans Pro', system-ui, -apple-system, sans-serif;
@@ -34,34 +43,38 @@
 // ─── HEADER ─────────────────────────────────────────────
 .mg-header {
     background: var(--mg-dark-2);
-    border-bottom: 2px solid var(--mg-gold-dim);
-    padding: 1rem 1.5rem;
+    border-bottom: 2px solid var(--mg-neon-cyan);
+    box-shadow: 0 2px 16px var(--mg-neon-cyan-glow);
+    padding: 0.75rem 1.5rem;
     position: sticky;
     top: 0;
     z-index: 100;
 
-    .mg-logo-text {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: var(--mg-gold);
-        letter-spacing: 0.05em;
+    .mg-logo-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
         text-decoration: none;
+    }
 
-        span {
-            color: var(--mg-text);
-            font-weight: 300;
-        }
+    .mg-logo-img {
+        height: 44px;
+        width: auto;
+        border-radius: 6px;
+        filter: drop-shadow(0 0 6px var(--mg-gold-glow));
     }
 
     .mg-nav-links {
         a {
             color: var(--mg-text-muted);
             text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
+            font-size: 0.88rem;
+            letter-spacing: 0.03em;
+            transition: color 0.2s, text-shadow 0.2s;
 
             &:hover {
-                color: var(--mg-gold);
+                color: var(--mg-neon-cyan);
+                text-shadow: 0 0 8px var(--mg-neon-cyan-glow);
             }
         }
     }
@@ -71,14 +84,15 @@
 .mg-main {
     max-width: 900px;
     margin: 0 auto;
-    padding: 1.5rem 1rem 3rem;
+    padding: 2rem 1rem 4rem;
 }
 
 // ─── TÍTULO SECCIÓN ──────────────────────────────────────
 .mg-section-title {
-    font-size: 1.6rem;
+    font-size: 1.7rem;
     font-weight: 700;
     color: var(--mg-gold);
+    text-shadow: 0 0 16px var(--mg-gold-glow);
     margin-bottom: 0.25rem;
 
     small {
@@ -86,7 +100,8 @@
         font-size: 0.9rem;
         font-weight: 400;
         color: var(--mg-text-muted);
-        margin-top: 0.1rem;
+        margin-top: 0.15rem;
+        text-shadow: none;
     }
 }
 
@@ -96,9 +111,9 @@
     gap: 0.5rem;
     overflow-x: auto;
     padding-bottom: 0.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
     scrollbar-width: thin;
-    scrollbar-color: var(--mg-gold-dim) transparent;
+    scrollbar-color: var(--mg-neon-cyan) transparent;
 
     &::-webkit-scrollbar {
         height: 4px;
@@ -109,15 +124,16 @@
     }
 
     &::-webkit-scrollbar-thumb {
-        background: var(--mg-gold-dim);
+        background: var(--mg-neon-cyan);
         border-radius: 2px;
+        box-shadow: 0 0 6px var(--mg-neon-cyan-glow);
     }
 }
 
 .mg-fecha-chip {
     flex-shrink: 0;
     background: var(--mg-dark-2);
-    border: 1px solid var(--mg-border);
+    border: 1px solid rgba(0, 212, 232, 0.25);
     border-radius: 10px;
     padding: 0.5rem 0.9rem;
     cursor: pointer;
@@ -126,10 +142,10 @@
     min-width: 70px;
 
     .chip-dia {
-        font-size: 0.7rem;
+        font-size: 0.68rem;
         color: var(--mg-text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
     }
 
     .chip-fecha {
@@ -140,17 +156,23 @@
     }
 
     &:hover {
-        border-color: var(--mg-gold);
+        border-color: var(--mg-neon-cyan);
+        box-shadow: 0 0 10px var(--mg-neon-cyan-glow);
         background: var(--mg-dark-3);
     }
 
     &.activa {
-        background: var(--mg-gold);
-        border-color: var(--mg-gold);
+        background: rgba(0, 212, 232, 0.12);
+        border-color: var(--mg-neon-cyan);
+        box-shadow: 0 0 12px var(--mg-neon-cyan-glow), inset 0 0 8px rgba(0, 212, 232, 0.08);
 
-        .chip-dia,
+        .chip-dia {
+            color: var(--mg-neon-cyan);
+        }
+
         .chip-fecha {
-            color: #0d1a0d;
+            color: var(--mg-neon-cyan);
+            text-shadow: 0 0 8px var(--mg-neon-cyan-glow);
         }
     }
 }
@@ -172,8 +194,8 @@
 }
 
 .franja-card {
-    background: var(--mg-green);
-    border: 1px solid rgba(58, 112, 56, 0.5);
+    background: var(--mg-dark-2);
+    border: 1px solid rgba(200, 223, 0, 0.3);
     border-radius: 10px;
     padding: 1rem 0.75rem;
     cursor: pointer;
@@ -183,40 +205,46 @@
     .franja-hora {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #fff;
+        color: var(--mg-neon-lime);
+        text-shadow: 0 0 8px var(--mg-neon-lime-glow);
     }
 
     .franja-aforo {
         font-size: 0.75rem;
-        color: rgba(255,255,255,0.7);
+        color: var(--mg-text-muted);
         margin-top: 0.2rem;
     }
 
     &:hover {
-        background: var(--mg-green-light);
-        border-color: var(--mg-gold);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        background: var(--mg-dark-3);
+        border-color: var(--mg-neon-lime);
+        box-shadow: 0 0 14px var(--mg-neon-lime-glow), 0 4px 12px rgba(0,0,0,0.4);
+        transform: translateY(-2px);
+
+        .franja-hora {
+            text-shadow: 0 0 12px var(--mg-neon-lime-glow);
+        }
     }
 
     &.llena {
-        background: #1a1a1a;
-        border-color: #333;
+        background: rgba(0,0,0,0.2);
+        border-color: rgba(255,255,255,0.06);
         cursor: not-allowed;
-        opacity: 0.6;
+        opacity: 0.45;
 
         .franja-hora {
-            color: #666;
+            color: #555;
+            text-shadow: none;
         }
 
         .franja-aforo {
-            color: #555;
+            color: #444;
         }
 
         &:hover {
             transform: none;
             box-shadow: none;
-            border-color: #333;
+            border-color: rgba(255,255,255,0.06);
         }
     }
 }
@@ -237,45 +265,48 @@
 .mg-loading {
     text-align: center;
     padding: 2rem;
-    color: var(--mg-gold);
+    color: var(--mg-neon-cyan);
 
     .spinner-border {
         width: 2rem;
         height: 2rem;
-        border-color: var(--mg-gold);
+        border-color: var(--mg-neon-cyan);
         border-right-color: transparent;
+        filter: drop-shadow(0 0 6px var(--mg-neon-cyan-glow));
     }
 }
 
 // ─── MODAL DE RESERVA ────────────────────────────────────
 .mg-modal .modal-content {
     background: var(--mg-dark-2);
-    border: 1px solid var(--mg-border);
+    border: 1px solid rgba(0, 212, 232, 0.3);
+    box-shadow: 0 0 30px var(--mg-neon-cyan-glow), 0 8px 40px rgba(0,0,0,0.6);
     color: var(--mg-text);
-    border-radius: 12px;
+    border-radius: 14px;
 }
 
 .mg-modal .modal-header {
-    border-bottom-color: var(--mg-border);
+    border-bottom: 1px solid rgba(0, 212, 232, 0.2);
 
     .modal-title {
         color: var(--mg-gold);
         font-weight: 700;
+        text-shadow: 0 0 10px var(--mg-gold-glow);
     }
 
     .btn-close {
-        filter: invert(1) sepia(1) saturate(2) hue-rotate(10deg);
+        filter: invert(1) sepia(1) saturate(2) hue-rotate(160deg);
         opacity: 0.7;
     }
 }
 
 .mg-modal .modal-footer {
-    border-top-color: var(--mg-border);
+    border-top: 1px solid rgba(0, 212, 232, 0.2);
 }
 
 .mg-franja-seleccionada {
     background: var(--mg-dark-3);
-    border: 1px solid var(--mg-border);
+    border: 1px solid rgba(200, 223, 0, 0.3);
     border-radius: 8px;
     padding: 0.75rem 1rem;
     margin-bottom: 1rem;
@@ -286,7 +317,8 @@
     .mg-franja-hora {
         font-size: 1.1rem;
         font-weight: 700;
-        color: var(--mg-gold);
+        color: var(--mg-neon-lime);
+        text-shadow: 0 0 8px var(--mg-neon-lime-glow);
     }
 
     .mg-franja-info {
@@ -299,14 +331,14 @@
 .mg-modal .form-control,
 .mg-modal .form-select {
     background: var(--mg-dark-3);
-    border-color: var(--mg-border);
+    border-color: rgba(193, 152, 73, 0.25);
     color: var(--mg-text);
 
     &:focus {
         background: var(--mg-dark-3);
-        border-color: var(--mg-gold-dim);
+        border-color: var(--mg-neon-cyan);
         color: var(--mg-text);
-        box-shadow: 0 0 0 0.2rem rgba(193,152,73,0.2);
+        box-shadow: 0 0 0 0.2rem var(--mg-neon-cyan-glow);
     }
 
     &::placeholder {
@@ -329,17 +361,22 @@ textarea {
 .btn-mg-primary {
     background: var(--mg-gold);
     border-color: var(--mg-gold);
-    color: #0d1a0d;
+    color: #0a0800;
     font-weight: 700;
+    text-shadow: none;
+    box-shadow: 0 0 12px var(--mg-gold-glow);
+    transition: all 0.2s;
 
     &:hover {
-        background: var(--mg-gold-dim);
-        border-color: var(--mg-gold-dim);
-        color: #0d1a0d;
+        background: #d4a850;
+        border-color: #d4a850;
+        color: #0a0800;
+        box-shadow: 0 0 20px var(--mg-gold-glow);
     }
 
     &:disabled {
         opacity: 0.5;
+        box-shadow: none;
     }
 }
 
@@ -360,8 +397,9 @@ textarea {
 // ─── VISTA DETALLE RESERVA ───────────────────────────────
 .mg-reserva-card {
     background: var(--mg-dark-2);
-    border: 1px solid var(--mg-border);
-    border-radius: 12px;
+    border: 1px solid rgba(0, 212, 232, 0.2);
+    box-shadow: 0 0 20px var(--mg-neon-cyan-glow), 0 8px 32px rgba(0,0,0,0.5);
+    border-radius: 14px;
     padding: 2rem;
     max-width: 500px;
     margin: 2rem auto;
@@ -370,6 +408,7 @@ textarea {
         font-size: 1.3rem;
         font-weight: 700;
         color: var(--mg-gold);
+        text-shadow: 0 0 10px var(--mg-gold-glow);
         margin-bottom: 1.5rem;
     }
 
@@ -378,7 +417,7 @@ textarea {
         justify-content: space-between;
         align-items: center;
         padding: 0.6rem 0;
-        border-bottom: 1px solid var(--mg-border);
+        border-bottom: 1px solid rgba(193, 152, 73, 0.12);
 
         &:last-of-type {
             border-bottom: none;
@@ -403,15 +442,21 @@ textarea {
     font-size: 0.8rem;
     font-weight: 600;
 
-    &.confirmada { background: rgba(40,167,69,0.2); color: #5cb85c; }
+    &.confirmada {
+        background: rgba(200, 223, 0, 0.15);
+        color: var(--mg-neon-lime);
+        box-shadow: 0 0 8px var(--mg-neon-lime-glow);
+    }
+
     &.pendiente  { background: rgba(255,193,7,0.2); color: #ffc107; }
     &.cancelada  { background: rgba(220,53,69,0.2); color: #dc3545; }
 }
 
 // ─── ALERTA DE ÉXITO POST-RESERVA ────────────────────────
 .mg-success-box {
-    background: rgba(42, 82, 40, 0.3);
-    border: 1px solid var(--mg-green-light);
+    background: rgba(0, 212, 232, 0.07);
+    border: 1px solid rgba(0, 212, 232, 0.3);
+    box-shadow: 0 0 16px var(--mg-neon-cyan-glow);
     border-radius: 10px;
     padding: 1.5rem;
     text-align: center;
@@ -419,13 +464,14 @@ textarea {
 
     .mg-success-icon {
         font-size: 2.5rem;
-        color: #5cb85c;
         margin-bottom: 0.75rem;
+        filter: drop-shadow(0 0 8px rgba(200, 223, 0, 0.5));
     }
 
     a {
-        color: var(--mg-gold);
+        color: var(--mg-neon-cyan);
         text-decoration: none;
+        text-shadow: 0 0 6px var(--mg-neon-cyan-glow);
 
         &:hover {
             text-decoration: underline;
@@ -436,7 +482,7 @@ textarea {
 // ─── MIS RESERVAS – FILTROS ──────────────────────────────
 .mg-filtros {
     background: var(--mg-dark-2);
-    border: 1px solid var(--mg-border);
+    border: 1px solid rgba(0, 212, 232, 0.2);
     border-radius: 12px;
     padding: 1rem 1.25rem;
     margin-bottom: 1.5rem;
@@ -456,24 +502,24 @@ textarea {
         min-width: 140px;
 
         label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--mg-text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
         }
 
         .form-control,
         .form-select {
             background: var(--mg-dark-3);
-            border-color: var(--mg-border);
+            border-color: rgba(193, 152, 73, 0.2);
             color: var(--mg-text);
             font-size: 0.9rem;
 
             &:focus {
                 background: var(--mg-dark-3);
-                border-color: var(--mg-gold-dim);
+                border-color: var(--mg-neon-cyan);
                 color: var(--mg-text);
-                box-shadow: 0 0 0 0.2rem rgba(193,152,73,0.15);
+                box-shadow: 0 0 0 0.2rem var(--mg-neon-cyan-glow);
             }
         }
     }
@@ -496,16 +542,17 @@ textarea {
 
 .mg-reserva-item {
     background: var(--mg-dark-2);
-    border: 1px solid var(--mg-border);
+    border: 1px solid rgba(0, 212, 232, 0.15);
     border-radius: 12px;
     padding: 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 
     &:hover {
-        border-color: rgba(193,152,73,0.4);
+        border-color: rgba(0, 212, 232, 0.4);
+        box-shadow: 0 0 14px var(--mg-neon-cyan-glow);
     }
 
     .mg-ri-header {
@@ -518,12 +565,14 @@ textarea {
         font-size: 1.1rem;
         font-weight: 700;
         color: var(--mg-gold);
+        text-shadow: 0 0 8px var(--mg-gold-glow);
     }
 
     .mg-ri-hora {
         font-size: 0.85rem;
-        color: var(--mg-text-muted);
+        color: var(--mg-neon-cyan);
         margin-top: 0.1rem;
+        text-shadow: 0 0 6px var(--mg-neon-cyan-glow);
     }
 
     .mg-ri-body {
@@ -546,19 +595,23 @@ textarea {
         flex-wrap: wrap;
         margin-top: auto;
         padding-top: 0.5rem;
-        border-top: 1px solid var(--mg-border);
+        border-top: 1px solid rgba(193, 152, 73, 0.1);
     }
 
-    // Estado pill inline
     .mg-estado-pill {
         padding: 0.2rem 0.6rem;
         border-radius: 99px;
         font-size: 0.75rem;
         font-weight: 600;
 
-        &.confirmada { background: rgba(40,167,69,0.2); color: #5cb85c; }
-        &.pendiente  { background: rgba(255,193,7,0.2); color: #ffc107; }
-        &.cancelada  { background: rgba(220,53,69,0.2); color: #dc3545; }
+        &.confirmada {
+            background: rgba(200, 223, 0, 0.12);
+            color: var(--mg-neon-lime);
+            box-shadow: 0 0 6px var(--mg-neon-lime-glow);
+        }
+
+        &.pendiente  { background: rgba(255,193,7,0.15); color: #ffc107; }
+        &.cancelada  { background: rgba(220,53,69,0.15); color: #dc3545; }
     }
 }
 
@@ -570,15 +623,26 @@ textarea {
     font-size: 0.8rem;
     padding: 0.35rem 0.75rem;
     border-radius: 6px;
-    border: 1px solid var(--mg-border);
+    border: 1px solid rgba(0, 212, 232, 0.3);
     background: transparent;
-    color: var(--mg-text-muted);
+    color: var(--mg-neon-cyan);
     text-decoration: none;
     transition: all 0.2s;
+    text-shadow: 0 0 6px var(--mg-neon-cyan-glow);
 
     &:hover {
-        border-color: var(--mg-gold);
-        color: var(--mg-gold);
-        background: rgba(193,152,73,0.08);
+        border-color: var(--mg-neon-cyan);
+        color: var(--mg-neon-cyan);
+        background: rgba(0, 212, 232, 0.08);
+        box-shadow: 0 0 10px var(--mg-neon-cyan-glow);
     }
+}
+
+// ─── DIVISOR NEON ────────────────────────────────────────
+.mg-neon-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--mg-neon-cyan), transparent);
+    box-shadow: 0 0 6px var(--mg-neon-cyan-glow);
+    margin: 1.5rem 0;
+    border: none;
 }

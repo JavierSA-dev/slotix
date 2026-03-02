@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="@yield('meta-description', 'Reserva online tu partida de minigolf en Córdoba, Andalucía. Elige fecha, horario y disfruta en familia.')">
     <meta name="keywords" content="minigolf Córdoba, reservas minigolf, ocio Córdoba, minigolf familiar">
-    <meta name="theme-color" content="#0d1a0d">
+    <meta name="theme-color" content="#120d02">
     <meta property="og:title" content="@yield('title', 'Reservas') | Minigolf Córdoba">
     <meta property="og:description" content="@yield('meta-description', 'Reserva online tu partida de minigolf en Córdoba, Andalucía.')">
     <meta property="og:type" content="website">
@@ -21,8 +21,10 @@
 
     <header class="mg-header">
         <div class="d-flex justify-content-between align-items-center">
-            <a href="{{ route('reservas.public.index') }}" class="mg-logo-text">
-                Minigolf <span>Córdoba</span>
+            <a href="{{ route('reservas.public.index') }}" class="mg-logo-link">
+                <img src="{{ URL::asset('images/logo_minigolf.jpg') }}"
+                     alt="Minigolf Córdoba"
+                     class="mg-logo-img">
             </a>
             <nav class="mg-nav-links d-flex align-items-center gap-3">
                 @guest

@@ -45,7 +45,10 @@
       "Bash(\"d:/trabajillos/minigolf_reservas/resources/views/auth/register.blade.php\":*)",
       "Bash(php artisan make:request AdminCrearReservaRequest --no-interaction)",
       "Bash(\"d:/trabajillos/minigolf_reservas/resources/views/admin/reservas/partials/modal-crear.blade.php\":*)",
-      "Bash(\"d:/trabajillos/minigolf_reservas/README.md\":*)"
+      "Bash(\"d:/trabajillos/minigolf_reservas/README.md\":*)",
+      "Bash(php artisan db:show --tables)",
+      "Bash(php artisan schema:show users)",
+      "Bash(grep -r \"telefono\\\\|phone\" database/migrations/*users*)"
     ]
   }
 }
