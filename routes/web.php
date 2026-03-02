@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MisReservasController;
+use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ReservaPublicaController;
 use App\Http\Controllers\RoleController;
@@ -53,6 +54,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // ─────────────────────────────────────────────────────────────────────────
     // MIS RESERVAS (usuario autenticado)
     // ─────────────────────────────────────────────────────────────────────────
+    Route::get('/mi-perfil', [PerfilController::class, 'show'])->name('mi-perfil');
     Route::get('/mis-reservas', [MisReservasController::class, 'index'])->name('mis-reservas.index');
     Route::patch('/mis-reservas/{reserva}/cancelar', [MisReservasController::class, 'cancelar'])->name('mis-reservas.cancelar');
 

@@ -16,6 +16,7 @@ class HorarioConfig extends Model
         'aforo_por_tramo',
         'horas_min_reserva',
         'horas_min_cancelacion',
+        'semanas_max_reserva',
         'activo',
         'en_mantenimiento',
     ];

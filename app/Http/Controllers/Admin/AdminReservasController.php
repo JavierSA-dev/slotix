@@ -22,8 +22,12 @@ class AdminReservasController extends Controller
     public function index(): View
     {
         $config = new ReservaDataTableConfig;
+        $usuarios = User::query()
+            ->whereDoesntHave('roles', fn ($q) => $q->whereIn('name', ['SuperAdmin', 'Admin']))
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
-        return view('admin.reservas.index', compact('config'));
+        return view('admin.reservas.index', compact('config', 'usuarios'));
     }
 
     public function getAjax(Request $request): JsonResponse

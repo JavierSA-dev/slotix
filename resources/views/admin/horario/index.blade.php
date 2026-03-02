@@ -111,7 +111,7 @@
                         </div>
 
                         {{-- Antelación mínima --}}
-                        <div class="row mb-4">
+                        <div class="row mb-3">
                             <div class="col-6">
                                 <label for="horas_min_reserva" class="form-label fw-semibold">
                                     Antelación mín. para reservar
@@ -146,6 +146,25 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
+
+                        {{-- Máximo de antelación para reservar --}}
+                        <div class="mb-4">
+                            <label for="semanas_max_reserva" class="form-label fw-semibold">
+                                Máximo de antelación para reservar
+                                <small class="text-muted fw-normal">(semanas)</small>
+                            </label>
+                            <input type="number"
+                                   class="form-control @error('semanas_max_reserva') is-invalid @enderror"
+                                   id="semanas_max_reserva"
+                                   name="semanas_max_reserva"
+                                   min="1"
+                                   max="52"
+                                   value="{{ $horario ? $horario->semanas_max_reserva : 4 }}">
+                            <div class="form-text">Número de semanas desde hoy que se muestran disponibles para reservar.</div>
+                            @error('semanas_max_reserva')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <button type="submit" class="btn btn-primary">

@@ -54,13 +54,23 @@
 
                     {{-- Sección usuario registrado --}}
                     <div id="seccion-usuario" class="d-none mb-3">
-                        <label class="form-label">Buscar usuario <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control mb-1" id="cr-buscar-usuario" placeholder="Escribe nombre o email...">
-                        <div id="cr-usuarios-lista" class="list-group" style="max-height:160px; overflow-y:auto;"></div>
-                        <div id="cr-usuario-seleccionado" class="alert alert-info d-none mt-2 py-2 px-3" style="font-size:.85rem;">
-                            <span id="cr-usuario-nombre-display"></span>
-                        </div>
+                        <label for="cr-select-usuario" class="form-label">Usuario <span class="text-danger">*</span></label>
+                        <select class="form-select" id="cr-select-usuario">
+                            <option value="">— Selecciona un usuario —</option>
+                            @foreach($usuarios as $u)
+                                <option value="{{ $u->id }}"
+                                        data-nombre="{{ $u->name }}"
+                                        data-email="{{ $u->email }}">
+                                    {{ $u->name }} — {{ $u->email }}
+                                </option>
+                            @endforeach
+                        </select>
                         <div class="text-danger small" data-field-error="user_id"></div>
+
+                        <div id="cr-usuario-info" class="d-none mt-2 p-2 bg-light rounded border" style="font-size:.85rem;">
+                            <div><strong>Nombre:</strong> <span id="cr-info-nombre"></span></div>
+                            <div><strong>Email:</strong> <span id="cr-info-email"></span></div>
+                        </div>
                     </div>
 
                     <div class="row g-3">
@@ -109,48 +119,36 @@ $(function () {
             $('#seccion-invitado').removeClass('d-none');
             $('#seccion-usuario').addClass('d-none');
             $('#cr-user-id').val('');
-            $('#cr-usuario-seleccionado').addClass('d-none');
+            $('#cr-nombre, #cr-email, #cr-telefono').prop('readonly', false).val('');
         } else {
             $('#seccion-invitado').addClass('d-none');
             $('#seccion-usuario').removeClass('d-none');
+            $('#cr-select-usuario').val('').trigger('change');
         }
     });
 
-    // ─── Búsqueda de usuarios ─────────────────────────────────
-    var buscarTimer;
-    $('#cr-buscar-usuario').on('input', function () {
-        clearTimeout(buscarTimer);
-        var q = $(this).val().trim();
-        if (q.length < 2) {
-            $('#cr-usuarios-lista').empty();
+    // ─── Selección de usuario registrado ──────────────────
+    $('#cr-select-usuario').on('change', function () {
+        var $opt = $(this).find(':selected');
+        var id = $(this).val();
+
+        if (!id) {
+            $('#cr-user-id').val('');
+            $('#cr-usuario-info').addClass('d-none');
             return;
         }
-        buscarTimer = setTimeout(function () {
-            $.ajax({
-                url: '/admin/reservas/buscar-usuarios',
-                data: { q: q },
-                success: function (usuarios) {
-                    var $lista = $('#cr-usuarios-lista').empty();
-                    if (!usuarios.length) {
-                        $lista.append('<div class="list-group-item text-muted small">Sin resultados</div>');
-                        return;
-                    }
-                    usuarios.forEach(function (u) {
-                        $lista.append(
-                            $('<button type="button" class="list-group-item list-group-item-action py-2"></button>')
-                                .text(u.name + ' – ' + u.email)
-                                .on('click', function () {
-                                    $('#cr-user-id').val(u.id);
-                                    $('#cr-usuario-nombre-display').text(u.name + ' (' + u.email + ')');
-                                    $('#cr-usuario-seleccionado').removeClass('d-none');
-                                    $lista.empty();
-                                    $('#cr-buscar-usuario').val('');
-                                })
-                        );
-                    });
-                }
-            });
-        }, 300);
+
+        var nombre = $opt.data('nombre');
+        var email  = $opt.data('email');
+
+        $('#cr-user-id').val(id);
+        $('#cr-info-nombre').text(nombre);
+        $('#cr-info-email').text(email);
+        $('#cr-usuario-info').removeClass('d-none');
+
+        // Rellenar los campos ocultos por si el backend los necesita
+        $('#cr-nombre').val(nombre);
+        $('#cr-email').val(email);
     });
 });
 </script>

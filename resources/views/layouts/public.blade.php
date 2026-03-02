@@ -31,12 +31,25 @@
                     <a href="{{ route('login') }}">Acceder</a>
                 @endguest
                 @auth
-                    <a href="{{ route('mis-reservas.index') }}">Mis reservas</a>
-                    @hasanyrole('SuperAdmin|Admin')
-                        <a href="{{ route('admin.dashboard') }}">Panel admin</a>
-                    @endhasanyrole
-                    <a href="javascript:void(0);" onclick="event.preventDefault(); document.getElementById('logout-pub').submit();">Salir</a>
-                    <form id="logout-pub" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+                    <div class="dropdown">
+                        <button class="btn mg-btn-avatar" id="navUserDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="{{ auth()->user()->name }}">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end mg-dropdown" aria-labelledby="navUserDropdown">
+                            <li><a class="dropdown-item" href="{{ route('mi-perfil') }}"><i class="bx bx-user me-2"></i>Mi perfil</a></li>
+                            <li><a class="dropdown-item" href="{{ route('mis-reservas.index') }}"><i class="bx bx-calendar me-2"></i>Mis reservas</a></li>
+                            @hasanyrole('SuperAdmin|Admin')
+                                <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="bx bx-cog me-2"></i>Panel admin</a></li>
+                            @endhasanyrole
+                            <li><hr class="dropdown-divider mg-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="javascript:void(0);" onclick="event.preventDefault(); document.getElementById('logout-pub').submit();">
+                                    <i class="bx bx-log-out me-2"></i>Cerrar sesión
+                                </a>
+                            </li>
+                        </ul>
+                        <form id="logout-pub" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+                    </div>
                 @endauth
             </nav>
         </div>

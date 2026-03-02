@@ -77,20 +77,19 @@ $(function () {
     }
 
     function renderFranjas(franjas) {
-        if (!franjas || franjas.length === 0) {
+        const disponibles = (franjas || []).filter(f => f.disponible);
+        if (!disponibles.length) {
             $franjasWrapper.html('<div class="mg-empty-state"><div class="mg-empty-icon">🚫</div><p>No hay franjas disponibles para este día.</p></div>');
             return;
         }
 
         let html = '<div class="franjas-grid">';
-        franjas.forEach(function (franja) {
-            const llena = !franja.disponible;
+        disponibles.forEach(function (franja) {
             const libre = franja.aforo - franja.reservadas;
             html += `
-                <div class="franja-card${llena ? ' llena' : ''}"
-                     ${!llena ? `data-hora="${franja.hora_inicio}"` : ''}>
+                <div class="franja-card" data-hora="${franja.hora_inicio}">
                     <div class="franja-hora">${franja.hora_inicio_fmt}</div>
-                    <div class="franja-aforo">${llena ? 'Sin plazas' : libre + ' plaza' + (libre !== 1 ? 's' : '')}</div>
+                    <div class="franja-aforo">${libre} plaza${libre !== 1 ? 's' : ''}</div>
                 </div>`;
         });
         html += '</div>';
@@ -99,7 +98,7 @@ $(function () {
 
     // ─── CLICK EN FRANJA DISPONIBLE ────────────────────────────
 
-    $franjasWrapper.on('click', '.franja-card:not(.llena)', function () {
+    $franjasWrapper.on('click', '.franja-card', function () {
         horaInicioSeleccionada = parseFloat($(this).data('hora'));
 
         $('#reserva-fecha').val(fechaSeleccionada);

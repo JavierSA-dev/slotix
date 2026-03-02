@@ -129,12 +129,14 @@ class ReservaPublicaController extends Controller
     {
         $horario = $this->reservaService->getHorarioActivo();
         $diasHabiles = $horario ? $horario->dias_semana : [0, 1, 2, 3, 4, 5, 6];
+        $semanasMax = $horario ? (int) $horario->semanas_max_reserva : 4;
         $nombresDias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
         $fechas = [];
         $dia = Carbon::today();
+        $limite = Carbon::today()->addWeeks($semanasMax);
         $intentos = 0;
 
-        while (count($fechas) < 14 && $intentos < 60) {
+        while ($dia->lte($limite) && $intentos < 120) {
             $diaSemana = $dia->dayOfWeekIso - 1;
 
             if (in_array($diaSemana, $diasHabiles)) {

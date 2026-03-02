@@ -8,6 +8,7 @@ use App\Services\ReservaService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
@@ -15,7 +16,7 @@ class MisReservasController extends Controller
 {
     public function __construct(protected ReservaService $reservaService) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): View|Response
     {
         $hoy = Carbon::today();
         $fechaDesde = $request->filled('fecha_desde')
@@ -36,15 +37,21 @@ class MisReservasController extends Controller
             $query->where('estado', $estado);
         }
 
-        $reservas = $query->get()->map(function ($reserva) {
+        $diasAbrev = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        $reservas = $query->get()->map(function ($reserva) use ($diasAbrev) {
             $horaInicio = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
             $horaFin = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
             $reserva->hora_inicio_fmt = $horaInicio;
             $reserva->hora_fin_fmt = $horaFin;
+            $reserva->dia_semana = $diasAbrev[$reserva->fecha->dayOfWeekIso - 1];
             $reserva->google_calendar_url = $this->buildGoogleCalendarUrl($reserva, $horaInicio, $horaFin);
 
             return $reserva;
         });
+
+        if ($request->ajax()) {
+            return response(view('mis-reservas.partials.grid', compact('reservas'))->render());
+        }
 
         $filtros = [
             'fecha_desde' => $fechaDesde->format('Y-m-d'),

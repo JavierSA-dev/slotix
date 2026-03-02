@@ -30,6 +30,7 @@ class AdminHorarioRequest extends FormRequest
             'aforo_por_tramo' => ['required', 'integer', 'min:1', 'max:100'],
             'horas_min_reserva' => ['required', 'integer', 'min:0', 'max:72'],
             'horas_min_cancelacion' => ['required', 'integer', 'min:0', 'max:72'],
+            'semanas_max_reserva' => ['required', 'integer', 'min:1', 'max:52'],
         ];
     }
 
