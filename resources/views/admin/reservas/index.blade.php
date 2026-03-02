@@ -20,6 +20,8 @@
 
 @push('scripts')
 <script>
+    console.log("hbola");
+    
     // ─── Confirmar reserva ────────────────────────────────────
     $(document).on('click', '.btn-confirmar-reserva', function () {
         $('#confirmar-reserva-id').val($(this).data('id'));
@@ -118,5 +120,47 @@
             }
         });
     });
+</script>
+<script>
+$(function () {
+    // ─── Toggle invitado / usuario ─────────────────────────
+    $('input[name="tipo_cliente"]').on('change', function () {
+        var tipo = $(this).val();
+        if (tipo === 'invitado') {
+            $('#seccion-invitado').removeClass('d-none');
+            $('#seccion-usuario').addClass('d-none');
+            $('#cr-user-id').val('');
+            $('#cr-nombre, #cr-email, #cr-telefono').prop('readonly', false).val('');
+        } else {
+            $('#seccion-invitado').addClass('d-none');
+            $('#seccion-usuario').removeClass('d-none');
+            $('#cr-select-usuario').val('').trigger('change');
+        }
+    });
+
+    // ─── Selección de usuario registrado ──────────────────
+    $('#cr-select-usuario').on('change', function () {
+        var $opt = $(this).find(':selected');
+        var id = $(this).val();
+
+        if (!id) {
+            $('#cr-user-id').val('');
+            $('#cr-usuario-info').addClass('d-none');
+            return;
+        }
+
+        var nombre = $opt.data('nombre');
+        var email  = $opt.data('email');
+
+        $('#cr-user-id').val(id);
+        $('#cr-info-nombre').text(nombre);
+        $('#cr-info-email').text(email);
+        $('#cr-usuario-info').removeClass('d-none');
+
+        // Rellenar los campos ocultos por si el backend los necesita
+        $('#cr-nombre').val(nombre);
+        $('#cr-email').val(email);
+    });
+});
 </script>
 @endpush
