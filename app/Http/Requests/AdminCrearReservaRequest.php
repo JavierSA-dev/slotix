@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AdminCrearReservaRequest extends FormRequest
@@ -17,11 +18,22 @@ class AdminCrearReservaRequest extends FormRequest
             [$h, $m] = explode(':', $this->input('hora_inicio'));
             $this->merge(['hora_inicio' => (int) $h + ((int) $m / 60)]);
         }
+
+        if ($this->filled('user_id')) {
+            $user = User::find($this->input('user_id'));
+            if ($user) {
+                $this->merge([
+                    'nombre' => $user->name,
+                    'email' => $user->email,
+                ]);
+            }
+        }
     }
 
     public function rules(): array
     {
         return [
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'nombre' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:150'],
             'telefono' => ['nullable', 'string', 'max:20'],

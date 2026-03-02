@@ -1,11 +1,7 @@
 /**
  * reservas-public.js
  * Lógica de la vista pública de reservas del Minigolf Córdoba.
- * Usa Flatpickr para la selección de fecha.
  */
-
-import flatpickr from 'flatpickr';
-import { Spanish } from 'flatpickr/dist/l10n/es.js';
 
 $(function () {
     // ─── ESTADO ────────────────────────────────────────────────
@@ -27,48 +23,40 @@ $(function () {
         return `${d}/${m}/${y}`;
     }
 
-    // ─── FLATPICKR ─────────────────────────────────────────────
+    // ─── CHIPS DE FECHAS ───────────────────────────────────────
 
-    const calendarEl = document.getElementById('mg-calendar');
-    if (!calendarEl) return;
+    const fechas = window.mgFechas || [];
+    const $tira = $('#mg-fechas');
 
-    // dias_semana PHP: 0=Lun, 1=Mar, ..., 6=Dom
-    // JS getDay():     0=Dom, 1=Lun, ..., 6=Sab
-    // Conversión: phpDay = jsDay === 0 ? 6 : jsDay - 1
-    const diasHabiles = window.mgDiasHabiles || [0, 1, 2, 3, 4, 5, 6];
+    if ($tira.length && fechas.length) {
+        fechas.forEach(function (f) {
+            const partes = f.etiqueta.split(' ');
+            const chip = $(`
+                <button type="button" class="mg-fecha-chip" data-fecha="${f.valor}">
+                    <div class="chip-dia">${partes[0]}</div>
+                    <div class="chip-fecha">${partes[1] || ''}</div>
+                </button>
+            `);
+            $tira.append(chip);
+        });
 
-    const fp = flatpickr(calendarEl, {
-        locale: Spanish,
-        inline: true,
-        minDate: 'today',
-        dateFormat: 'Y-m-d',
-        disable: [
-            function (date) {
-                const jsDay = date.getDay();
-                const phpDay = jsDay === 0 ? 6 : jsDay - 1;
-                return !diasHabiles.includes(phpDay);
-            }
-        ],
-        onChange: function (selectedDates, dateStr) {
-            if (dateStr) {
-                fechaSeleccionada = dateStr;
-                cargarFranjas(dateStr);
-            }
+        // Seleccionar la primera fecha automáticamente
+        const $primer = $tira.find('.mg-fecha-chip').first();
+        if ($primer.length) {
+            seleccionarFecha($primer);
         }
-    });
-
-    // Auto-seleccionar hoy o el primer día hábil disponible
-    let diaInicial = new Date();
-    diaInicial.setHours(0, 0, 0, 0);
-    for (let i = 0; i < 60; i++) {
-        const jsDay = diaInicial.getDay();
-        const phpDay = jsDay === 0 ? 6 : jsDay - 1;
-        if (diasHabiles.includes(phpDay)) {
-            fp.setDate(diaInicial, true);
-            break;
-        }
-        diaInicial.setDate(diaInicial.getDate() + 1);
     }
+
+    function seleccionarFecha($chip) {
+        $tira.find('.mg-fecha-chip').removeClass('activa');
+        $chip.addClass('activa');
+        fechaSeleccionada = $chip.data('fecha');
+        cargarFranjas(fechaSeleccionada);
+    }
+
+    $tira.on('click', '.mg-fecha-chip', function () {
+        seleccionarFecha($(this));
+    });
 
     // ─── CARGA DE FRANJAS (AJAX) ───────────────────────────────
 
@@ -144,10 +132,13 @@ $(function () {
                 $('#modal-reserva-footer').addClass('d-none');
                 $('#reserva-success').removeClass('d-none');
                 $('#reserva-gestion-link').attr('href', response.url);
+                if (response.google_calendar_url) {
+                    $('#btn-gcal-modal').attr('href', response.google_calendar_url).removeClass('d-none');
+                }
                 if (fechaSeleccionada) { cargarFranjas(fechaSeleccionada); }
             },
             error: function (xhr) {
-                $btn.prop('disabled', false).text('Enviar solicitud');
+                $btn.prop('disabled', false).text('Confirmar reserva');
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON?.errors || {};
                     Object.keys(errors).forEach(function (campo) {
@@ -173,7 +164,8 @@ $(function () {
         $('[data-field-error]').text('');
         $('#reserva-success').addClass('d-none');
         $('#modal-reserva-footer').removeClass('d-none');
-        $('#btn-confirmar-reserva').prop('disabled', false).text('Enviar solicitud');
+        $('#btn-confirmar-reserva').prop('disabled', false).text('Confirmar reserva');
+        $('#btn-gcal-modal').addClass('d-none').attr('href', '#');
         $('#reserva-fecha').val(fechaSeleccionada);
         $('#reserva-hora-inicio').val(horaInicioSeleccionada);
     }

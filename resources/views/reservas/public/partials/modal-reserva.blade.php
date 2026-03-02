@@ -63,9 +63,14 @@
                     <div class="mg-success-icon">✅</div>
                     <p class="mb-2"><strong>¡Reserva confirmada!</strong></p>
                     <p class="small text-muted mb-3">Te hemos enviado un email de confirmación.</p>
-                    <a href="#" id="reserva-gestion-link" class="btn btn-sm btn-outline-light">
-                        Gestionar mi reserva
-                    </a>
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        <a href="#" id="reserva-gestion-link" class="btn btn-sm btn-outline-light">
+                            Ver mi reserva
+                        </a>
+                        <a href="#" id="btn-gcal-modal" class="btn-gcal d-none" target="_blank" rel="noopener">
+                            <i class="bx bx-calendar-plus"></i> Añadir a Google Calendar
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer" id="modal-reserva-footer">

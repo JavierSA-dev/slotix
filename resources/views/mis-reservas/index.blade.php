@@ -1,88 +1,117 @@
-@extends('layouts.master')
+@extends('layouts.public')
 
 @section('title', 'Mis reservas')
 
 @section('content')
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-flex align-items-center justify-content-between">
-                <h4 class="mb-0">Mis reservas</h4>
-                <a href="{{ route('reservas.public.index') }}" class="btn btn-primary btn-sm">
-                    <i class="bx bx-plus me-1"></i> Nueva reserva
-                </a>
-            </div>
-        </div>
+    <div class="mb-4">
+        <h1 class="mg-section-title">
+            Mis reservas
+            <small>Gestiona tus reservas</small>
+        </h1>
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            @if($reservas->isEmpty())
-                <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="bx bx-calendar-x" style="font-size:3rem;color:#ccc;"></i>
-                        <p class="mt-3 text-muted">Aún no tienes reservas.</p>
-                        <a href="{{ route('reservas.public.index') }}" class="btn btn-primary">Hacer una reserva</a>
+    {{-- Filtros --}}
+    <div class="mg-filtros">
+        <form method="GET" action="{{ route('mis-reservas.index') }}">
+            <div class="mg-filtros-row">
+                <div class="mg-filtro-group">
+                    <label for="f-desde">Desde</label>
+                    <input type="date" class="form-control" id="f-desde" name="fecha_desde" value="{{ $filtros['fecha_desde'] }}">
+                </div>
+                <div class="mg-filtro-group">
+                    <label for="f-hasta">Hasta</label>
+                    <input type="date" class="form-control" id="f-hasta" name="fecha_hasta" value="{{ $filtros['fecha_hasta'] }}">
+                </div>
+                <div class="mg-filtro-group">
+                    <label for="f-estado">Estado</label>
+                    <select class="form-select" id="f-estado" name="estado">
+                        <option value="" {{ $filtros['estado'] === '' ? 'selected' : '' }}>Todos</option>
+                        <option value="pendiente" {{ $filtros['estado'] === 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                        <option value="confirmada" {{ $filtros['estado'] === 'confirmada' ? 'selected' : '' }}>Confirmada</option>
+                        <option value="cancelada" {{ $filtros['estado'] === 'cancelada' ? 'selected' : '' }}>Cancelada</option>
+                    </select>
+                </div>
+                <div class="mg-filtro-group" style="min-width:auto; flex:0;">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn btn-mg-primary btn-sm">Filtrar</button>
+                </div>
+                <div class="mg-filtro-group" style="min-width:auto; flex:0;">
+                    <label>&nbsp;</label>
+                    <a href="{{ route('reservas.public.index') }}" class="btn btn-mg-secondary btn-sm">+ Nueva reserva</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if($reservas->isEmpty())
+        <div class="mg-empty-state">
+            <div class="mg-empty-icon">📅</div>
+            <p>No hay reservas para el rango seleccionado.</p>
+            <a href="{{ route('reservas.public.index') }}" class="btn btn-mg-primary mt-2">Hacer una reserva</a>
+        </div>
+    @else
+        <div class="mg-mis-reservas-grid">
+            @foreach($reservas as $reserva)
+                <div class="mg-reserva-item">
+                    <div class="mg-ri-header">
+                        <div>
+                            <div class="mg-ri-fecha">{{ $reserva->fecha->format('d/m/Y') }}</div>
+                            <div class="mg-ri-hora">{{ $reserva->hora_inicio_fmt }} – {{ $reserva->hora_fin_fmt }}</div>
+                        </div>
+                        <span class="mg-estado-pill {{ $reserva->estado }}">{{ ucfirst($reserva->estado) }}</span>
+                    </div>
+                    <div class="mg-ri-body">
+                        <span><i class="bx bx-group me-1"></i>{{ $reserva->num_personas }} persona{{ $reserva->num_personas > 1 ? 's' : '' }}</span>
+                        @if($reserva->notas)
+                            <span class="mg-ri-notas">{{ Str::limit($reserva->notas, 60) }}</span>
+                        @endif
+                    </div>
+                    <div class="mg-ri-actions">
+                        <a href="{{ $reserva->google_calendar_url }}" target="_blank" rel="noopener" class="btn-gcal">
+                            <i class="bx bx-calendar-plus"></i> Google Calendar
+                        </a>
+                        @if($reserva->estado !== 'cancelada')
+                            <button class="btn btn-outline-danger btn-sm btn-cancelar-mi-reserva"
+                                    data-id="{{ $reserva->id }}"
+                                    style="margin-left:auto;">
+                                Cancelar
+                            </button>
+                        @endif
                     </div>
                 </div>
-            @else
-                <div class="row g-3">
-                    @foreach($reservas as $reserva)
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
-                                            <h6 class="card-title mb-0">{{ $reserva->fecha->format('d/m/Y') }}</h6>
-                                            <small class="text-muted">{{ $reserva->hora_inicio_fmt }} – {{ $reserva->hora_fin_fmt }}</small>
-                                        </div>
-                                        <span class="pill-label pill-label-{{ $reserva->estado === 'confirmada' ? 'primary' : ($reserva->estado === 'cancelada' ? 'secondary' : 'warning') }}">
-                                            {{ ucfirst($reserva->estado) }}
-                                        </span>
-                                    </div>
-                                    <p class="mb-1 small"><i class="bx bx-group me-1"></i>{{ $reserva->num_personas }} persona{{ $reserva->num_personas > 1 ? 's' : '' }}</p>
-                                    @if($reserva->notas)
-                                        <p class="mb-0 small text-muted">{{ Str::limit($reserva->notas, 60) }}</p>
-                                    @endif
-                                </div>
-                                @if($reserva->estado !== 'cancelada')
-                                    <div class="card-footer bg-transparent border-top-0 pt-0">
-                                        <button class="btn btn-outline-danger btn-sm btn-cancelar-reserva"
-                                                data-id="{{ $reserva->id }}">
-                                            Cancelar
-                                        </button>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
+            @endforeach
         </div>
-    </div>
+    @endif
+
+    @include('mis-reservas.partials.modal-cancelar')
 @endsection
 
 @push('scripts')
 <script>
 $(function () {
-    $('.btn-cancelar-reserva').on('click', function () {
-        if (!confirm('¿Seguro que quieres cancelar esta reserva?')) {
-            return;
-        }
+    $('.btn-cancelar-mi-reserva').on('click', function () {
+        var id = $(this).data('id');
+        $('#cancelar-mi-reserva-id').val(id);
+        $('#cancelar-mi-reserva-error').addClass('d-none').text('');
+        new bootstrap.Modal(document.getElementById('modal-cancelar-mi-reserva')).show();
+    });
 
-        const id = $(this).data('id');
-        const $btn = $(this);
-        $btn.prop('disabled', true).text('Cancelando...');
+    $('#btn-confirmar-cancelar-mi').on('click', function () {
+        var id = $('#cancelar-mi-reserva-id').val();
+        var $btn = $(this);
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Cancelando...');
 
         $.ajax({
             url: '/mis-reservas/' + id + '/cancelar',
             method: 'PATCH',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             success: function () {
+                bootstrap.Modal.getInstance(document.getElementById('modal-cancelar-mi-reserva')).hide();
                 location.reload();
             },
             error: function (xhr) {
-                alert(xhr.responseJSON?.message || 'Error al cancelar.');
-                $btn.prop('disabled', false).text('Cancelar');
+                $btn.prop('disabled', false).html('Sí, cancelar');
+                $('#cancelar-mi-reserva-error').text(xhr.responseJSON?.message || 'Error al cancelar.').removeClass('d-none');
             }
         });
     });

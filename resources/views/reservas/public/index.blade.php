@@ -15,20 +15,20 @@
             <div class="mg-empty-icon">⛳</div>
             <p>En este momento no hay horario configurado. Vuelve pronto.</p>
         </div>
+    @elseif(empty($fechasDisponibles))
+        <div class="mg-empty-state">
+            <div class="mg-empty-icon">📅</div>
+            <p>No hay fechas disponibles próximamente. Vuelve pronto.</p>
+        </div>
     @else
-        <div class="mg-reserva-layout">
-            {{-- Calendario Flatpickr --}}
-            <div class="mg-calendar-wrapper">
-                <div id="mg-calendar"></div>
-            </div>
+        {{-- Tira de chips de fechas --}}
+        <div class="mg-fechas-strip" id="mg-fechas"></div>
 
-            {{-- Grid de franjas (cargado por AJAX) --}}
-            <div class="mg-franjas-wrapper">
-                <div id="franjas-wrapper">
-                    <div class="mg-empty-state">
-                        <div class="mg-empty-icon">📅</div>
-                        <p>Selecciona una fecha para ver los horarios disponibles</p>
-                    </div>
+        {{-- Grid de franjas (cargado por AJAX) --}}
+        <div class="mg-franjas-wrapper">
+            <div id="franjas-wrapper">
+                <div class="mg-loading">
+                    <div class="spinner-border" role="status"></div>
                 </div>
             </div>
         </div>
@@ -39,7 +39,7 @@
 
 @push('scripts')
     <script>
-        window.mgDiasHabiles = @json($diasHabiles);
+        window.mgFechas = @json($fechasDisponibles);
     </script>
     @vite(['resources/js/pages/reservas-public.js'])
 @endpush

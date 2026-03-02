@@ -32,7 +32,7 @@
             <div class="d-flex align-items-center px-2" id="mantenimiento-toggle-wrapper"
                  title="{{ $enMantenimiento ? 'Desactivar modo mantenimiento' : 'Activar modo mantenimiento' }}">
                 <span class="d-none d-xl-inline-block me-2 font-size-13 text-{{ $enMantenimiento ? 'warning' : 'muted' }}" id="mantenimiento-label">
-                    {{ $enMantenimiento ? 'Mantenimiento' : 'Web pública' }}
+                    Mantenimiento
                 </span>
                 <div class="form-check form-switch mb-0">
                     <input class="form-check-input"

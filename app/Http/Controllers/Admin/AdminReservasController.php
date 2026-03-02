@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminCrearReservaRequest;
 use App\Mail\ReservaConfirmadaMail;
 use App\Models\Reserva;
+use App\Models\User;
 use App\Services\ReservaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -102,18 +103,37 @@ class AdminReservasController extends Controller
                 'start' => $r->fecha->format('Y-m-d').'T'.$horaInicio.':00',
                 'end' => $r->fecha->format('Y-m-d').'T'.$horaFin.':00',
                 'backgroundColor' => $r->estado === 'confirmada' ? '#2a5228' : '#856404',
-                'borderColor' => $r->estado === 'confirmada' ? '#3a7038' : '#c69444',
+                'borderColor' => $r->estado === 'confirmada' ? '#3a7038' : '#c19849',
                 'textColor' => '#ffffff',
                 'extendedProps' => [
                     'estado' => $r->estado,
                     'email' => $r->email,
+                    'telefono' => $r->telefono,
                     'personas' => $r->num_personas,
+                    'notas' => $r->notas,
                     'token' => $r->token,
+                    'fecha_fmt' => $r->fecha->format('d/m/Y'),
+                    'hora_inicio_fmt' => $horaInicio,
+                    'hora_fin_fmt' => $horaFin,
                 ],
             ];
         });
 
         return response()->json($events);
+    }
+
+    public function buscarUsuarios(Request $request): JsonResponse
+    {
+        $q = $request->input('q', '');
+        $usuarios = User::query()
+            ->where(function ($query) use ($q) {
+                $query->where('name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%");
+            })
+            ->limit(10)
+            ->get(['id', 'name', 'email']);
+
+        return response()->json($usuarios);
     }
 
     private function applyFilters($query, Request $request): void

@@ -42,6 +42,31 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         height: 'auto',
         dayMaxEvents: 4,
+        eventClick: function (info) {
+            const p = info.event.extendedProps;
+
+            document.getElementById('modal-ev-nombre').textContent = info.event.title;
+            document.getElementById('modal-ev-fecha').textContent = p.fecha_fmt || '';
+            document.getElementById('modal-ev-hora').textContent = (p.hora_inicio_fmt || '') + ' – ' + (p.hora_fin_fmt || '');
+            document.getElementById('modal-ev-personas').textContent = p.personas || '';
+            document.getElementById('modal-ev-email').textContent = p.email || '';
+            document.getElementById('modal-ev-telefono').textContent = p.telefono || '–';
+            document.getElementById('modal-ev-notas').textContent = p.notas || '–';
+
+            const estadoEl = document.getElementById('modal-ev-estado');
+            estadoEl.textContent = p.estado ? p.estado.charAt(0).toUpperCase() + p.estado.slice(1) : '';
+            estadoEl.className = 'pill-label pill-label-' + (p.estado === 'confirmada' ? 'primary' : 'warning');
+
+            const linkVer = document.getElementById('modal-ev-link');
+            if (p.token) {
+                linkVer.href = '/reservas/' + p.token;
+                linkVer.classList.remove('d-none');
+            } else {
+                linkVer.classList.add('d-none');
+            }
+
+            new bootstrap.Modal(document.getElementById('modal-evento-detalle')).show();
+        },
     });
 
     calendar.render();

@@ -28,9 +28,9 @@ class ReservaPublicaController extends Controller
         }
 
         $horario = $this->reservaService->getHorarioActivo();
-        $diasHabiles = $horario ? $horario->dias_semana : [0, 1, 2, 3, 4, 5, 6];
+        $fechasDisponibles = $horario ? $this->generarProximas14Fechas() : [];
 
-        return view('reservas.public.index', compact('horario', 'diasHabiles'));
+        return view('reservas.public.index', compact('horario', 'fechasDisponibles'));
     }
 
     /**
@@ -60,6 +60,7 @@ class ReservaPublicaController extends Controller
 
         $reserva = $this->reservaService->crearReserva($data);
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+        $horaFinFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
 
         Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada));
 
@@ -67,6 +68,7 @@ class ReservaPublicaController extends Controller
             'message' => '¡Reserva recibida! En breve recibirás un email de confirmación.',
             'token' => $reserva->token,
             'url' => route('reservas.show', $reserva->token),
+            'google_calendar_url' => $this->buildGoogleCalendarUrl($reserva, $horaFormateada, $horaFinFormateada),
         ]);
     }
 
@@ -78,8 +80,9 @@ class ReservaPublicaController extends Controller
         $reserva = Reserva::where('token', $token)->firstOrFail();
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
         $horaFinFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
+        $googleCalendarUrl = $this->buildGoogleCalendarUrl($reserva, $horaFormateada, $horaFinFormateada);
 
-        return view('reservas.public.show', compact('reserva', 'horaFormateada', 'horaFinFormateada'));
+        return view('reservas.public.show', compact('reserva', 'horaFormateada', 'horaFinFormateada', 'googleCalendarUrl'));
     }
 
     /**
@@ -147,5 +150,20 @@ class ReservaPublicaController extends Controller
         }
 
         return $fechas;
+    }
+
+    /**
+     * Genera la URL de Google Calendar para añadir una reserva.
+     */
+    private function buildGoogleCalendarUrl(Reserva $reserva, string $horaInicio, string $horaFin): string
+    {
+        $fecha = $reserva->fecha->format('Ymd');
+        $inicio = str_replace(':', '', $horaInicio);
+        $fin = str_replace(':', '', $horaFin);
+        $title = urlencode('Minigolf Córdoba – Reserva');
+        $details = urlencode("Reserva de {$reserva->num_personas} persona(s). Referencia: {$reserva->token}");
+        $location = urlencode('Minigolf Córdoba');
+
+        return "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$title}&dates={$fecha}T{$inicio}00/{$fecha}T{$fin}00&details={$details}&location={$location}";
     }
 }

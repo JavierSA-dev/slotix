@@ -86,6 +86,64 @@
             <div id="admin-calendar" data-events-url="{{ route('admin.reservas.calendarEvents') }}"></div>
         </div>
     </div>
+
+    {{-- Modal detalle evento calendario --}}
+    <div class="modal fade" id="modal-evento-detalle" tabindex="-1" aria-labelledby="modalEvDetalleLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalEvDetalleLabel">
+                        <i class="bx bx-calendar me-1"></i> Detalle de reserva
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <th class="text-muted fw-normal" style="width:120px;">Nombre</th>
+                                <td id="modal-ev-nombre" class="fw-semibold"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted fw-normal">Estado</th>
+                                <td><span id="modal-ev-estado" class="pill-label"></span></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted fw-normal">Fecha</th>
+                                <td id="modal-ev-fecha"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted fw-normal">Horario</th>
+                                <td id="modal-ev-hora"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted fw-normal">Personas</th>
+                                <td id="modal-ev-personas"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted fw-normal">Email</th>
+                                <td id="modal-ev-email"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted fw-normal">Teléfono</th>
+                                <td id="modal-ev-telefono"></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted fw-normal">Notas</th>
+                                <td id="modal-ev-notas" class="text-muted fst-italic"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <a id="modal-ev-link" href="#" target="_blank" class="btn btn-sm btn-info d-none">
+                        <i class="bx bx-link-external me-1"></i>Ver reserva completa
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Mail\ReservaCanceladaMail;
 use App\Models\Reserva;
 use App\Services\ReservaService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
@@ -13,21 +15,44 @@ class MisReservasController extends Controller
 {
     public function __construct(protected ReservaService $reservaService) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $reservas = auth()->user()
+        $hoy = Carbon::today();
+        $fechaDesde = $request->filled('fecha_desde')
+            ? Carbon::parse($request->input('fecha_desde'))
+            : $hoy->copy()->subDays(7);
+        $fechaHasta = $request->filled('fecha_hasta')
+            ? Carbon::parse($request->input('fecha_hasta'))
+            : $hoy->copy()->addDays(7);
+        $estado = $request->input('estado', '');
+
+        $query = auth()->user()
             ->reservas()
+            ->whereBetween('fecha', [$fechaDesde->format('Y-m-d'), $fechaHasta->format('Y-m-d')])
             ->orderByDesc('fecha')
-            ->orderByDesc('hora_inicio')
-            ->get()
-            ->map(function ($reserva) {
-                $reserva->hora_inicio_fmt = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
-                $reserva->hora_fin_fmt = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
+            ->orderByDesc('hora_inicio');
 
-                return $reserva;
-            });
+        if ($estado !== '') {
+            $query->where('estado', $estado);
+        }
 
-        return view('mis-reservas.index', compact('reservas'));
+        $reservas = $query->get()->map(function ($reserva) {
+            $horaInicio = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+            $horaFin = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
+            $reserva->hora_inicio_fmt = $horaInicio;
+            $reserva->hora_fin_fmt = $horaFin;
+            $reserva->google_calendar_url = $this->buildGoogleCalendarUrl($reserva, $horaInicio, $horaFin);
+
+            return $reserva;
+        });
+
+        $filtros = [
+            'fecha_desde' => $fechaDesde->format('Y-m-d'),
+            'fecha_hasta' => $fechaHasta->format('Y-m-d'),
+            'estado' => $estado,
+        ];
+
+        return view('mis-reservas.index', compact('reservas', 'filtros'));
     }
 
     public function cancelar(Reserva $reserva): JsonResponse
@@ -44,5 +69,17 @@ class MisReservasController extends Controller
         Mail::to($reserva->email)->send(new ReservaCanceladaMail($reserva, $horaFormateada));
 
         return response()->json(['message' => 'Reserva cancelada correctamente.']);
+    }
+
+    private function buildGoogleCalendarUrl(Reserva $reserva, string $horaInicio, string $horaFin): string
+    {
+        $fecha = $reserva->fecha->format('Ymd');
+        $inicio = str_replace(':', '', $horaInicio);
+        $fin = str_replace(':', '', $horaFin);
+        $title = urlencode('Minigolf Córdoba – Reserva');
+        $details = urlencode("Reserva de {$reserva->num_personas} persona(s).");
+        $location = urlencode('Minigolf Córdoba');
+
+        return "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$title}&dates={$fecha}T{$inicio}00/{$fecha}T{$fin}00&details={$details}&location={$location}";
     }
 }

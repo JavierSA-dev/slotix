@@ -80,14 +80,20 @@
 
         @if($reserva->estado !== 'cancelada')
             <div class="mt-4 no-print">
-                <div class="mg-info-box mb-3" style="background:rgba(198,148,68,0.08); border:1px solid rgba(198,148,68,0.25); border-radius:8px; padding:.9rem 1rem; font-size:.85rem; color:var(--mg-text-muted);">
+                <div class="text-center mb-3">
+                    <a href="{{ $googleCalendarUrl }}" target="_blank" rel="noopener" class="btn-gcal">
+                        <i class="bx bx-calendar-plus"></i> Añadir a Google Calendar
+                    </a>
+                </div>
+
+                <div class="mg-info-box mb-3" style="background:rgba(193,152,73,0.08); border:1px solid rgba(193,152,73,0.25); border-radius:8px; padding:.9rem 1rem; font-size:.85rem; color:var(--mg-text-muted);">
                     <i class="bx bx-info-circle me-1" style="color:var(--mg-gold);"></i>
                     Si necesitas cancelar, hazlo con la máxima antelación posible para que otros clientes puedan reservar ese horario.
                 </div>
                 <div class="text-center">
-                    <button id="btn-cancelar"
-                            class="btn btn-outline-danger"
-                            data-token="{{ $reserva->token }}">
+                    <button class="btn btn-outline-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal-cancelar-show">
                         <i class="bx bx-x-circle me-1"></i>Cancelar reserva
                     </button>
                 </div>
@@ -119,30 +125,28 @@
         </div>
     </div>
     @endguest
+
+    @include('reservas.public.partials.modal-cancelar-show')
 @endsection
 
 @push('scripts')
 <script>
 $(function () {
-    $('#btn-cancelar').on('click', function () {
-        if (!confirm('¿Seguro que quieres cancelar esta reserva? Recuerda cancelar con la máxima antelación posible.')) {
-            return;
-        }
-
-        const token = $(this).data('token');
+    $('#btn-confirmar-cancelar').on('click', function () {
         const $btn = $(this);
         $btn.prop('disabled', true).html('<i class="bx bx-loader-alt bx-spin me-1"></i>Cancelando...');
 
         $.ajax({
-            url: '/reservas/' + token + '/cancelar',
+            url: '/reservas/{{ $reserva->token }}/cancelar',
             method: 'PATCH',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             success: function () {
+                bootstrap.Modal.getInstance(document.getElementById('modal-cancelar-show')).hide();
                 location.reload();
             },
             error: function (xhr) {
-                alert(xhr.responseJSON?.message || 'Error al cancelar.');
-                $btn.prop('disabled', false).html('<i class="bx bx-x-circle me-1"></i>Cancelar reserva');
+                $btn.prop('disabled', false).html('Sí, cancelar reserva');
+                $('#modal-cancelar-error').text(xhr.responseJSON?.message || 'Error al cancelar.').removeClass('d-none');
             }
         });
     });

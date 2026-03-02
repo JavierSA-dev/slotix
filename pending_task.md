@@ -1,0 +1,4 @@
+quitar el calendario de la vista pública de reservas, usar los estilos que habian antes, a parte incorporar que tanto el admin como el usuario pueda añadir su reserva al google calendar, por cierto intenta usar modales con estilos correspondientes para las acciones, nada de confirm() ni alert(), que el admin cuando haga la reserva para alguien pueda marcar usuario existente o lo que está ahora para alguien que no tiene usuario
+que desde el full calendar del admin, puedas hacer click en la reserva y se abre modal con los detalles
+
+cuando un usuario acceda a mis-reservas, que vea una vista con estilos parecidos a los de la vista pública, ahora mismo se va a una vista con estilos de admin, debe irse a una vista en la que ve todas sus reservas con un diseño mobile first y pueda filtrar por rango de fechas y estado, por defecto te muestra  las reservas de una semana hacia atrás y hacia delante, que sea con cards
