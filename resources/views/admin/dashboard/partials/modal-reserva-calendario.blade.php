@@ -58,8 +58,12 @@
                             <input type="date" class="form-control form-control-sm" id="modal-ev-fecha" name="fecha" required>
                         </div>
                         <div class="col-12">
-                            <label class="form-label">Notas</label>
-                            <textarea class="form-control form-control-sm" id="modal-ev-notas" name="notas" rows="2" style="resize:none;"></textarea>
+                            <label class="form-label">Observaciones del cliente</label>
+                            <textarea class="form-control form-control-sm bg-light" id="modal-ev-notas" name="notas" rows="2" style="resize:none;" readonly></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Observaciones del admin</label>
+                            <textarea class="form-control form-control-sm" id="modal-ev-notas-admin" name="notas_admin" rows="2" style="resize:none;" placeholder="Notas internas (no visibles para el cliente)"></textarea>
                         </div>
                     </div>
                 </form>

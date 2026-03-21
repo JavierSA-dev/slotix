@@ -33,6 +33,7 @@ class AdminActualizarReservaRequest extends FormRequest
             'hora_inicio' => ['required', 'integer', 'min:0', 'max:1439'],
             'num_personas' => ['required', 'integer', 'min:1'],
             'notas' => ['nullable', 'string', 'max:500'],
+            'notas_admin' => ['nullable', 'string', 'max:1000'],
             'estado' => ['required', Rule::in(['pendiente', 'confirmada', 'cancelada'])],
         ];
     }

@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('modal-ev-fecha').value = data.fecha;
                 document.getElementById('modal-ev-hora-inicio').value = data.hora_inicio;
                 document.getElementById('modal-ev-notas').value = data.notas || '';
+                document.getElementById('modal-ev-notas-admin').value = data.notas_admin || '';
                 setEstadoActivo(data.estado);
 
                 const gcalBtn = document.getElementById('modal-ev-gcal');
@@ -153,10 +154,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 payload.append('estado', data.estado);
                 payload.append('fecha', nuevaFecha);
                 payload.append('hora_inicio', nuevaHoraInicio);
-                const notaFinal = notas
-                    ? (data.notas ? data.notas + '\n[Cambio de fecha] ' + notas : '[Cambio de fecha] ' + notas)
-                    : (data.notas || '');
-                payload.append('notas', notaFinal);
+                payload.append('notas', data.notas || '');
+                const notaAdmin = notas
+                    ? (data.notas_admin ? data.notas_admin + '\n[Cambio de fecha] ' + notas : '[Cambio de fecha] ' + notas)
+                    : (data.notas_admin || '');
+                payload.append('notas_admin', notaAdmin);
 
                 return fetch(reservasUrl + '/' + reservaId, {
                     method: 'POST',

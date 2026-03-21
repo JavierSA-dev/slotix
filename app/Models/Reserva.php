@@ -19,6 +19,7 @@ class Reserva extends Model
         'token',
         'estado',
         'notas',
+        'notas_admin',
     ];
 
     protected function casts(): array

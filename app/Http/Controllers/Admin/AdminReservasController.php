@@ -81,6 +81,7 @@ class AdminReservasController extends Controller
             'num_personas' => $reserva->num_personas,
             'estado' => $reserva->estado,
             'notas' => $reserva->notas,
+            'notas_admin' => $reserva->notas_admin,
             'token' => $reserva->token,
         ]);
     }
