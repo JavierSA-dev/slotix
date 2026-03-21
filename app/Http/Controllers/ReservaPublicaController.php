@@ -37,7 +37,8 @@ class ReservaPublicaController extends Controller
         $horario = $this->reservaService->getHorarioActivo();
         $fechasDisponibles = $horario ? $this->generarProximas14Fechas() : [];
         $empresaSlug = $empresa;
-        $temaCss = AppServiceProvider::generarTemaCss(tenancy()->tenant->tema ?? 'neon');
+        $tenant = tenancy()->tenant;
+        $temaCss = AppServiceProvider::generarTemaCss($tenant->tema ?? 'neon', $tenant->colores ?? []);
 
         return view('reservas.public.index', compact('horario', 'fechasDisponibles', 'empresaSlug', 'temaCss'));
     }
@@ -92,7 +93,8 @@ class ReservaPublicaController extends Controller
         $horaFinFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
         $googleCalendarUrl = $this->buildGoogleCalendarUrl($reserva, $horaFormateada, $horaFinFormateada);
         $empresaSlug = $empresa;
-        $temaCss = AppServiceProvider::generarTemaCss(tenancy()->tenant->tema ?? 'neon');
+        $tenant = tenancy()->tenant;
+        $temaCss = AppServiceProvider::generarTemaCss($tenant->tema ?? 'neon', $tenant->colores ?? []);
 
         return view('reservas.public.show', compact('reserva', 'horaFormateada', 'horaFinFormateada', 'googleCalendarUrl', 'empresaSlug', 'temaCss'));
     }
