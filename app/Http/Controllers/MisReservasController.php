@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\ReservaCanceladaMail;
 use App\Models\Reserva;
 use App\Services\ReservaService;
+use App\Traits\ResuelveTemaCss;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ use Illuminate\View\View;
 
 class MisReservasController extends Controller
 {
+    use ResuelveTemaCss;
+
     public function __construct(protected ReservaService $reservaService) {}
 
     public function index(Request $request): View|Response
@@ -59,7 +62,9 @@ class MisReservasController extends Controller
             'estado' => $estado,
         ];
 
-        return view('mis-reservas.index', compact('reservas', 'filtros'));
+        $temaCss = $this->resolverTemaCss();
+
+        return view('mis-reservas.index', compact('reservas', 'filtros', 'temaCss'));
     }
 
     public function cancelar(Reserva $reserva): JsonResponse
@@ -83,10 +88,9 @@ class MisReservasController extends Controller
         $fecha = $reserva->fecha->format('Ymd');
         $inicio = str_replace(':', '', $horaInicio);
         $fin = str_replace(':', '', $horaFin);
-        $title = urlencode('Minigolf Córdoba – Reserva');
+        $title = urlencode('Reserva');
         $details = urlencode("Reserva de {$reserva->num_personas} persona(s).");
-        $location = urlencode('Minigolf Córdoba');
 
-        return "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$title}&dates={$fecha}T{$inicio}00/{$fecha}T{$fin}00&details={$details}&location={$location}";
+        return "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$title}&dates={$fecha}T{$inicio}00/{$fecha}T{$fin}00&details={$details}";
     }
 }

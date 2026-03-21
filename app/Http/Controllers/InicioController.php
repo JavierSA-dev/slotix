@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Providers\AppServiceProvider;
 use App\Services\ReservaService;
+use App\Traits\ResuelveTemaCss;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class InicioController extends Controller
 {
+    use ResuelveTemaCss;
+
     public function __construct(protected ReservaService $reservaService) {}
 
     public function index(): View|RedirectResponse
@@ -38,8 +40,7 @@ class InicioController extends Controller
         $horario = $this->reservaService->getHorarioActivo();
         $fechasDisponibles = $horario ? $this->reservaService->generarFechasDisponibles() : [];
         $empresaSlug = $empresa->id;
-        $tenant = tenancy()->tenant;
-        $temaCss = AppServiceProvider::generarTemaCss($tenant->tema ?? 'neon', $tenant->colores ?? []);
+        $temaCss = $this->resolverTemaCss();
 
         tenancy()->end();
 

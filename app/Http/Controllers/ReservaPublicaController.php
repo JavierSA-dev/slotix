@@ -180,9 +180,10 @@ class ReservaPublicaController extends Controller
         $fecha = $reserva->fecha->format('Ymd');
         $inicio = str_replace(':', '', $horaInicio);
         $fin = str_replace(':', '', $horaFin);
-        $title = urlencode('Minigolf Córdoba – Reserva');
+        $empresaNombre = tenancy()->tenant?->nombre ?? config('app.name');
+        $title = urlencode("{$empresaNombre} – Reserva");
         $details = urlencode("Reserva de {$reserva->num_personas} persona(s). Referencia: {$reserva->token}");
-        $location = urlencode('Minigolf Córdoba');
+        $location = urlencode($empresaNombre);
 
         return "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$title}&dates={$fecha}T{$inicio}00/{$fecha}T{$fin}00&details={$details}&location={$location}";
     }

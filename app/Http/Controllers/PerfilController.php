@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Traits\ResuelveTemaCss;
 use Illuminate\View\View;
 
 class PerfilController extends Controller
 {
+    use ResuelveTemaCss;
+
     public function show(): View
     {
-        return view('perfil.index', ['user' => auth()->user()]);
+        $temaCss = $this->resolverTemaCss();
+
+        return view('perfil.index', ['user' => auth()->user(), 'temaCss' => $temaCss]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Empresa;
+use App\Providers\AppServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,7 +29,9 @@ class CheckMaintenanceMode
             if ($empresaId) {
                 $empresa = Empresa::find($empresaId);
                 if ($empresa && $empresa->en_mantenimiento) {
-                    return response()->view('mantenimiento.public', [], 503);
+                    $temaCss = AppServiceProvider::generarTemaCss($empresa->tema ?? 'neon', $empresa->colores ?? []);
+
+                    return response()->view('mantenimiento.public', compact('temaCss'), 503);
                 }
             }
         } catch (\Exception $e) {
