@@ -16,3 +16,6 @@ yarn-error.log
 /.idea
 /.vscode
 /.claude
+.mcp.json
+CLAUDE.md
+/docs
