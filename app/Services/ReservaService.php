@@ -158,4 +158,38 @@ class ReservaService
 
         return (int) $h + ((int) $m / 60);
     }
+
+    /**
+     * Genera el listado de fechas disponibles según el horario activo.
+     *
+     * @return array<int, array{valor: string, etiqueta: string, dia_nombre: string}>
+     */
+    public function generarFechasDisponibles(): array
+    {
+        $horario = $this->getHorarioActivo();
+        $diasHabiles = $horario ? $horario->dias_semana : [0, 1, 2, 3, 4, 5, 6];
+        $semanasMax = $horario ? (int) $horario->semanas_max_reserva : 4;
+        $nombresDias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        $fechas = [];
+        $dia = Carbon::today();
+        $limite = Carbon::today()->addWeeks($semanasMax);
+        $intentos = 0;
+
+        while ($dia->lte($limite) && $intentos < 120) {
+            $diaSemana = $dia->dayOfWeekIso - 1;
+
+            if (in_array($diaSemana, $diasHabiles)) {
+                $fechas[] = [
+                    'valor' => $dia->format('Y-m-d'),
+                    'etiqueta' => $nombresDias[$diaSemana].' '.$dia->format('d/m'),
+                    'dia_nombre' => $dia->locale('es')->isoFormat('dddd'),
+                ];
+            }
+
+            $dia = $dia->copy()->addDay();
+            $intentos++;
+        }
+
+        return $fechas;
+    }
 }

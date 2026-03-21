@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InicioController;
 use App\Http\Controllers\MisReservasController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PermissionController;
@@ -38,22 +39,14 @@ Auth::routes(['verify' => true, 'register' => true]);
 // RUTAS PÚBLICAS (sin autenticación)
 // ─────────────────────────────────────────────────────────────────────────
 Route::get('/', function () {
-    if (auth()->check()) {
-        $user = auth()->user();
-
-        if ($user->hasAnyRole(['SuperAdmin', 'Admin'])) {
-            return redirect()->route('admin.dashboard');
-        }
-
-        $empresa = $user->empresas()->first();
-
-        return $empresa
-            ? redirect()->route('reservas.public.index', $empresa->id)
-            : redirect()->route('mis-reservas.index');
+    if (! auth()->check()) {
+        return redirect()->route('login');
     }
 
-    return redirect()->route('login');
+    return app(InicioController::class)->index();
 })->name('inicio');
+
+Route::middleware(['auth', 'active'])->post('/seleccionar-empresa', [InicioController::class, 'seleccionarEmpresa'])->name('inicio.seleccionar');
 
 // ─────────────────────────────────────────────────────────────────────────
 // RUTAS AUTENTICADAS

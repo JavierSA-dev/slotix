@@ -30,12 +30,12 @@ class ReservaPublicaController extends Controller
      */
     public function index(string $empresa): View|RedirectResponse
     {
-        if (auth()->check() && auth()->user()->hasAnyRole(['SuperAdmin', 'Admin'])) {
-            return redirect()->route('admin.dashboard');
+        if (auth()->check()) {
+            return redirect()->route('inicio');
         }
 
         $horario = $this->reservaService->getHorarioActivo();
-        $fechasDisponibles = $horario ? $this->generarProximas14Fechas() : [];
+        $fechasDisponibles = $horario ? $this->reservaService->generarFechasDisponibles() : [];
         $empresaSlug = $empresa;
         $tenant = tenancy()->tenant;
         $temaCss = AppServiceProvider::generarTemaCss($tenant->tema ?? 'neon', $tenant->colores ?? []);
@@ -142,35 +142,6 @@ class ReservaPublicaController extends Controller
      *
      * @return array<int, array{valor: string, etiqueta: string, dia_nombre: string}>
      */
-    private function generarProximas14Fechas(): array
-    {
-        $horario = $this->reservaService->getHorarioActivo();
-        $diasHabiles = $horario ? $horario->dias_semana : [0, 1, 2, 3, 4, 5, 6];
-        $semanasMax = $horario ? (int) $horario->semanas_max_reserva : 4;
-        $nombresDias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-        $fechas = [];
-        $dia = Carbon::today();
-        $limite = Carbon::today()->addWeeks($semanasMax);
-        $intentos = 0;
-
-        while ($dia->lte($limite) && $intentos < 120) {
-            $diaSemana = $dia->dayOfWeekIso - 1;
-
-            if (in_array($diaSemana, $diasHabiles)) {
-                $fechas[] = [
-                    'valor' => $dia->format('Y-m-d'),
-                    'etiqueta' => $nombresDias[$diaSemana].' '.$dia->format('d/m'),
-                    'dia_nombre' => $dia->locale('es')->isoFormat('dddd'),
-                ];
-            }
-
-            $dia = $dia->copy()->addDay();
-            $intentos++;
-        }
-
-        return $fechas;
-    }
-
     /**
      * Auto-login para acceso rápido en modo demo.
      */

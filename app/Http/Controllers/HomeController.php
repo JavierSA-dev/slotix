@@ -44,6 +44,27 @@ class HomeController extends Controller
         return redirect()->route('mis-reservas.index');
     }
 
+    public function selector()
+    {
+        $user = auth()->user();
+
+        if ($user->hasAnyRole(['SuperAdmin', 'Admin'])) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $empresas = $user->empresas()->get();
+
+        if ($empresas->count() === 1) {
+            return redirect()->route('reservas.public.index', $empresas->first()->id);
+        }
+
+        if ($empresas->isEmpty()) {
+            return redirect()->route('mis-reservas.index');
+        }
+
+        return view('inicio.selector', compact('empresas'));
+    }
+
     public function updateProfile(Request $request, $id)
     {
         $request->validate([
