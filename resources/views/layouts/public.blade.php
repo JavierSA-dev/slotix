@@ -44,6 +44,7 @@
                             <i class="fas fa-user"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end mg-dropdown" aria-labelledby="navUserDropdown">
+                            <li><a class="dropdown-item" href="{{ route('inicio') }}"><i class="bx bx-home me-2"></i>Inicio</a></li>
                             <li><a class="dropdown-item" href="{{ route('mi-perfil') }}"><i class="bx bx-user me-2"></i>Mi perfil</a></li>
                             <li><a class="dropdown-item" href="{{ route('mis-reservas.index') }}"><i class="bx bx-calendar me-2"></i>Mis reservas</a></li>
                             @hasanyrole('SuperAdmin|Admin')
