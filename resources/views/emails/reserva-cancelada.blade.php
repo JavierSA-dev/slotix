@@ -21,7 +21,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Minigolf Córdoba</h1>
+            <h1>{{ $empresaNombre ?: config('app.name') }}</h1>
             <p>Cancelación de reserva</p>
         </div>
         <div class="body">
@@ -49,7 +49,7 @@
             @endif
         </div>
         <div class="footer">
-            Minigolf Córdoba · Córdoba, Andalucía
+            {{ $empresaNombre ?: config('app.name') }}
         </div>
     </div>
 </body>

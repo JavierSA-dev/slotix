@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <title>@yield('title', 'Panel') | {{ isset($empresaMaster) && $empresaMaster ? $empresaMaster->nombre : 'Panel' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Panel de administración de Minigolf Córdoba. Gestiona reservas, horarios y aforo.">
+    <meta name="description" content="Panel de administración · {{ config('app.name') }}">
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- App favicon -->

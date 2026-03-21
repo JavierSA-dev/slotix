@@ -66,9 +66,9 @@
             El enlace de demo que has utilizado ya no está activo.<br>
             Si quieres conocer más sobre esta plataforma, contáctanos y te preparamos una nueva demo personalizada.
         </p>
-        <a href="mailto:info@reservas.app" class="cta">Solicitar nueva demo</a>
+        <a href="mailto:{{ config('mail.from.address') }}" class="cta">Solicitar nueva demo</a>
         <hr class="divider">
-        <p class="small">Sistema de reservas online · Powered by Slotix</p>
+        <p class="small">Sistema de reservas online · Powered by {{ config('app.name') }}</p>
     </div>
 </body>
 </html>

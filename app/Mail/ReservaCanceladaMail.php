@@ -17,11 +17,14 @@ class ReservaCanceladaMail extends Mailable
         public readonly Reserva $reserva,
         public readonly string $horaFormateada,
         public readonly ?string $empresaSlug = null,
+        public readonly string $empresaNombre = '',
     ) {}
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Reserva cancelada - Minigolf Córdoba');
+        $nombre = $this->empresaNombre ?: config('app.name');
+
+        return new Envelope(subject: "Reserva cancelada - {$nombre}");
     }
 
     public function content(): Content

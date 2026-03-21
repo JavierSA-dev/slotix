@@ -72,7 +72,8 @@ class ReservaPublicaController extends Controller
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
         $horaFinFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
 
-        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, $empresa));
+        $empresaNombre = tenancy()->tenant->nombre ?? config('app.name');
+        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, $empresa, $empresaNombre));
         $this->notificacionService->nuevaReserva($reserva, $empresa, $horaFormateada);
 
         return response()->json([
@@ -128,8 +129,9 @@ class ReservaPublicaController extends Controller
 
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
 
+        $empresaNombre = tenancy()->tenant->nombre ?? config('app.name');
         $this->reservaService->cancelarReserva($reserva);
-        Mail::to($reserva->email)->send(new ReservaCanceladaMail($reserva, $horaFormateada, $empresa));
+        Mail::to($reserva->email)->send(new ReservaCanceladaMail($reserva, $horaFormateada, $empresa, $empresaNombre));
         $this->notificacionService->reservaCancelada($reserva, $empresa, $horaFormateada);
 
         return response()->json(['message' => 'Reserva cancelada correctamente.']);

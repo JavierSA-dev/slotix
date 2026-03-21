@@ -17,11 +17,14 @@ class ReservaConfirmadaMail extends Mailable
         public readonly Reserva $reserva,
         public readonly string $horaFormateada,
         public readonly string $empresaSlug,
+        public readonly string $empresaNombre = '',
     ) {}
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Confirmación de reserva - Minigolf Córdoba');
+        $nombre = $this->empresaNombre ?: config('app.name');
+
+        return new Envelope(subject: "Confirmación de reserva - {$nombre}");
     }
 
     public function content(): Content

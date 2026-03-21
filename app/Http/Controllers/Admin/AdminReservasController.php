@@ -8,6 +8,7 @@ use App\Http\Requests\AdminActualizarReservaRequest;
 use App\Http\Requests\AdminCrearReservaRequest;
 use App\Mail\ReservaCanceladaMail;
 use App\Mail\ReservaConfirmadaMail;
+use App\Models\Empresa;
 use App\Models\Reserva;
 use App\Models\User;
 use App\Services\NotificacionService;
@@ -24,6 +25,11 @@ class AdminReservasController extends Controller
         protected ReservaService $reservaService,
         protected NotificacionService $notificacionService,
     ) {}
+
+    private function empresaNombre(): string
+    {
+        return Empresa::find(session('empresa_id'))?->nombre ?? config('app.name');
+    }
 
     public function index(): View
     {
@@ -97,9 +103,9 @@ class AdminReservasController extends Controller
         $empresaSlug = session('empresa_id', '');
 
         if ($estadoAnterior !== 'confirmada' && $reserva->estado === 'confirmada') {
-            Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, $empresaSlug));
+            Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, $empresaSlug, $this->empresaNombre()));
         } elseif ($estadoAnterior !== 'cancelada' && $reserva->estado === 'cancelada') {
-            Mail::to($reserva->email)->send(new ReservaCanceladaMail($reserva, $horaFormateada, $empresaSlug));
+            Mail::to($reserva->email)->send(new ReservaCanceladaMail($reserva, $horaFormateada, $empresaSlug, $this->empresaNombre()));
             $this->notificacionService->reservaCancelada($reserva, $empresaSlug, $horaFormateada);
         }
 
@@ -118,7 +124,7 @@ class AdminReservasController extends Controller
 
         $reserva->update(['estado' => 'confirmada']);
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
-        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, session('empresa_id', '')));
+        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, session('empresa_id', ''), $this->empresaNombre()));
 
         return response()->json(['message' => 'Reserva confirmada.']);
     }
@@ -139,7 +145,7 @@ class AdminReservasController extends Controller
         $data = $request->validated();
         $reserva = $this->reservaService->crearReserva($data);
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
-        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, session('empresa_id', '')));
+        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, session('empresa_id', ''), $this->empresaNombre()));
 
         return response()->json(['message' => 'Reserva creada correctamente.', 'id' => $reserva->id]);
     }

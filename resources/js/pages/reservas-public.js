@@ -1,6 +1,6 @@
 /**
  * reservas-public.js
- * Lógica de la vista pública de reservas del Minigolf Córdoba.
+ * Lógica de la vista pública de reservas (Slotix).
  */
 
 $(function () {

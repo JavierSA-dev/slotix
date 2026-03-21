@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════
-// Slotix – Vista pública de reservas
-// Los valores por defecto corresponden al tema "neon"
-// El resto de temas sobreescriben estas variables via PHP
+// Slotix – Vista pública de reservas (multi-tenant)
+// Variables :root = defaults del tema "neon"
+// Cada empresa sobreescribe estas variables via PHP
 // ═══════════════════════════════════════════════════════
 
 :root {
