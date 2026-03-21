@@ -23,7 +23,7 @@
 
     <header class="mg-header">
         <div class="d-flex justify-content-between align-items-center">
-            <a href="{{ isset($empresaSlug) ? route('reservas.public.index', $empresaSlug) : route('login') }}" class="mg-logo-link">
+            <a href="{{ isset($empresaSlug) ? route('reservas.public.index', $empresaSlug) : route('inicio') }}" class="mg-logo-link">
                 @if(isset($empresaLogo) && $empresaLogo)
                     <img src="{{ $empresaLogo }}" alt="{{ $empresaNombre ?? 'Logo' }}" class="mg-logo-img">
                 @else

@@ -37,7 +37,23 @@ Auth::routes(['verify' => true, 'register' => true]);
 // ─────────────────────────────────────────────────────────────────────────
 // RUTAS PÚBLICAS (sin autenticación)
 // ─────────────────────────────────────────────────────────────────────────
-Route::get('/', fn () => redirect()->route('login'))->name('inicio');
+Route::get('/', function () {
+    if (auth()->check()) {
+        $user = auth()->user();
+
+        if ($user->hasAnyRole(['SuperAdmin', 'Admin'])) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $empresa = $user->empresas()->first();
+
+        return $empresa
+            ? redirect()->route('reservas.public.index', $empresa->id)
+            : redirect()->route('mis-reservas.index');
+    }
+
+    return redirect()->route('login');
+})->name('inicio');
 
 // ─────────────────────────────────────────────────────────────────────────
 // RUTAS AUTENTICADAS

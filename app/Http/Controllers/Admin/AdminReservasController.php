@@ -241,7 +241,7 @@ class AdminReservasController extends Controller
 
     private function renderAcciones(Reserva $reserva): string
     {
-        $urlVer = route('reservas.show', $reserva->token);
+        $urlVer = route('reservas.show', ['empresa' => session('empresa_id'), 'token' => $reserva->token]);
         $btn = '<div class="d-flex gap-1 justify-content-center">';
         $btn .= '<a href="'.$urlVer.'" target="_blank" class="btn btn-sm btn-info" title="Ver reserva"><i class="fa fa-eye"></i></a>';
 

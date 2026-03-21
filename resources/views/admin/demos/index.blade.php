@@ -161,22 +161,33 @@ $(function () {
     // ─── Eliminar demo ────────────────────────────────────────
     $(document).on('click', '.btn-eliminar-demo', function () {
         var id = $(this).data('id');
-        if (!confirm('¿Eliminar esta demo? Se borrará la base de datos y el enlace dejará de funcionar.')) { return; }
-
         var $btn = $(this);
-        $btn.prop('disabled', true);
 
-        $.ajax({
-            url: '{{ route('admin.demos.index') }}/' + id,
-            type: 'POST',
-            data: { '_method': 'DELETE', '_token': $('meta[name="csrf-token"]').attr('content') },
-            success: function () {
-                $btn.closest('tr').fadeOut(400, function () { $(this).remove(); });
-            },
-            error: function () {
-                alert('Error al eliminar la demo.');
-                $btn.prop('disabled', false);
-            }
+        Swal.fire({
+            title: '¿Eliminar esta demo?',
+            text: 'Se borrará la base de datos y el enlace dejará de funcionar.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33',
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
+
+            $btn.prop('disabled', true);
+
+            $.ajax({
+                url: '{{ route('admin.demos.index') }}/' + id,
+                type: 'POST',
+                data: { '_method': 'DELETE', '_token': $('meta[name="csrf-token"]').attr('content') },
+                success: function () {
+                    $btn.closest('tr').fadeOut(400, function () { $(this).remove(); });
+                },
+                error: function () {
+                    Swal.fire('Error', 'Error al eliminar la demo.', 'error');
+                    $btn.prop('disabled', false);
+                }
+            });
         });
     });
 });

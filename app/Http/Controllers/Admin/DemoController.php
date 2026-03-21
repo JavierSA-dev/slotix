@@ -69,13 +69,14 @@ class DemoController extends Controller
         $adminDemo->assignRole('Admin');
         $empresa->users()->attach($adminDemo->id);
 
-        User::create([
+        $userDemo = User::create([
             'name' => 'Cliente Demo',
             'email' => "user_{$tenantId}@demo.slotix.app",
             'password' => Hash::make(Str::random(32)),
             'activo' => true,
             'email_verified_at' => now(),
         ]);
+        $empresa->users()->attach($userDemo->id);
 
         $invitacion = DemoInvitacion::create([
             'tenant_id' => $tenantId,

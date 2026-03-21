@@ -183,18 +183,29 @@ $(function () {
     // ─── Eliminar empresa ─────────────────────────────────────
     $(document).on('click', '.btn-eliminar-empresa', function () {
         var id = $(this).data('id');
-        if (!confirm('¿Seguro que quieres eliminar esta empresa? Esta acción no se puede deshacer.')) { return; }
 
-        $.ajax({
-            url: '{{ route('admin.empresas.index') }}/' + id,
-            type: 'POST',
-            data: { '_method': 'DELETE', '_token': $('meta[name="csrf-token"]').attr('content') },
-            success: function () {
-                $('#empresas-table').DataTable().ajax.reload(null, false);
-            },
-            error: function (xhr) {
-                alert(xhr.responseJSON?.message || 'Error al eliminar la empresa.');
-            }
+        Swal.fire({
+            title: '¿Eliminar esta empresa?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33',
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
+
+            $.ajax({
+                url: '{{ route('admin.empresas.index') }}/' + id,
+                type: 'POST',
+                data: { '_method': 'DELETE', '_token': $('meta[name="csrf-token"]').attr('content') },
+                success: function () {
+                    $('#empresas-table').DataTable().ajax.reload(null, false);
+                },
+                error: function (xhr) {
+                    Swal.fire('Error', xhr.responseJSON?.message || 'Error al eliminar la empresa.', 'error');
+                }
+            });
         });
     });
 
@@ -236,31 +247,45 @@ $(function () {
 
     // ─── Migrar todas las BDs ─────────────────────────────────
     $('#btn-migrar-todas').on('click', function () {
-        if (!confirm('¿Ejecutar migraciones pendientes en TODAS las bases de datos de empresa? Esta acción puede tardar varios segundos.')) { return; }
-
         var $btn = $(this);
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Migrando...');
 
-        $.ajax({
-            url: '{{ route('admin.empresas.migrarTodas') }}',
-            type: 'POST',
-            data: { '_token': $('meta[name="csrf-token"]').attr('content') },
-            success: function (data) {
-                var resumen = data.resultados.map(function (r) {
-                    var icono = r.estado === 'ok' ? '✓' : '✗';
-                    var texto = icono + ' ' + r.empresa;
-                    if (r.estado === 'error') { texto += ': ' + r.mensaje; }
-                    return texto;
-                }).join('\n');
+        Swal.fire({
+            title: '¿Ejecutar migraciones?',
+            text: 'Se ejecutarán las migraciones pendientes en TODAS las bases de datos de empresa. Puede tardar varios segundos.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, migrar',
+            cancelButtonText: 'Cancelar',
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
 
-                alert('Resultado de la migración:\n\n' + resumen);
-            },
-            error: function (xhr) {
-                alert('Error al ejecutar las migraciones: ' + (xhr.responseJSON?.message || 'Error desconocido'));
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html('<i class="bx bx-data me-1"></i> Migrar todas las BDs');
-            }
+            $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Migrando...');
+
+            $.ajax({
+                url: '{{ route('admin.empresas.migrarTodas') }}',
+                type: 'POST',
+                data: { '_token': $('meta[name="csrf-token"]').attr('content') },
+                success: function (data) {
+                    var resumen = data.resultados.map(function (r) {
+                        var icono = r.estado === 'ok' ? '✓' : '✗';
+                        var texto = icono + ' ' + r.empresa;
+                        if (r.estado === 'error') { texto += ': ' + r.mensaje; }
+                        return texto;
+                    }).join('<br>');
+
+                    Swal.fire({
+                        title: 'Resultado de la migración',
+                        html: resumen,
+                        icon: 'info',
+                    });
+                },
+                error: function (xhr) {
+                    Swal.fire('Error', 'Error al ejecutar las migraciones: ' + (xhr.responseJSON?.message || 'Error desconocido'), 'error');
+                },
+                complete: function () {
+                    $btn.prop('disabled', false).html('<i class="bx bx-data me-1"></i> Migrar todas las BDs');
+                }
+            });
         });
     });
 });
