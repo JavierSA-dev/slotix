@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "*",
       "Bash(for lib in bootstrap-editable bootstrap-filestyle2 bootstrap-maxlength bootstrap-rating bootstrap-timepicker chance chart.js datatables.net-autofill datatables.net-autofill-bs4 datatables.net-keytable datatables.net-keytable-bs4 datatables.net-select datatables.net-select-bs4 dropzone echarts flot.curvedlines flot-charts fullcalendar gmaps gulp-rtlcss inputmask ion-rangeslider jquery.easing jquery.flot.tooltip jquery.repeater jquery-knob jquery-sparkline jquery-steps jquery-ui-dist jquery-validation jszip leaflet magnific-popup masonry-layout parsleyjs pdfmake spectrum-colorpicker2 sweetalert2 table-edits tinymce toastr tui-calendar tui-chart tui-date-picker tui-dom tui-time-picker)",
       "Bash(do if [ -d \"$lib\" ])",
       "Bash(then mv \"$lib\" ../libs-unused/)",
@@ -50,7 +51,29 @@
       "Bash(php artisan schema:show users)",
       "Bash(grep -r \"telefono\\\\|phone\" database/migrations/*users*)",
       "Bash(php artisan make:class Http/Controllers/PerfilController --no-interaction)",
-      "Bash(php artisan make:migration add_semanas_max_reserva_to_horario_config --no-interaction)"
-    ]
+      "Bash(php artisan make:migration add_semanas_max_reserva_to_horario_config --no-interaction)",
+      "mcp__laravel-boost__application-info",
+      "Bash(grep -r \"protected $table\\\\|protected $fillable\\\\|public function\" /d/trabajillos/minigolf_reservas/app/Http/Requests/*.php)",
+      "mcp__laravel-boost__database-schema",
+      "mcp__laravel-boost__search-docs",
+      "WebFetch(domain:tenancyforlaravel.com)",
+      "Bash(composer require stancl/tenancy --no-interaction)",
+      "Bash(php artisan tenancy:install --no-interaction)",
+      "Bash(php artisan make:migration create_empresa_user_table --no-interaction)",
+      "Bash(php artisan make:migration create_modulos_table --no-interaction)",
+      "Bash(php artisan make:migration create_empresa_modulo_table --no-interaction)",
+      "Bash(php artisan make:command MigrarDatosEmpresaInicial --no-interaction)",
+      "Bash(php artisan db:seed --class=ModuloSeeder --no-interaction)",
+      "Bash(php artisan db:seed --class=EmpresaSeeder --no-interaction)",
+      "Bash(php artisan empresa:migrar-inicial --no-interaction)",
+      "mcp__laravel-boost__database-query",
+      "Bash(php -r \":*)",
+      "mcp__laravel-boost__last-error",
+      "Bash(test -f /d/trabajillos/minigolf_reservas/README.md)",
+      "Bash(php artisan make:request ActualizarMiEmpresaRequest --no-interaction)",
+      "Bash(php artisan boost:database-schema tenants)",
+      "Bash(*)", "Edit(*)", "Read(*)"
+    ],
+    "deny": []
   }
 }

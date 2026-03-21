@@ -71,5 +71,8 @@ class Kernel extends HttpKernel
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         'es_admin' => \App\Http\Middleware\EsAdmin::class,
+        'empresa' => \App\Http\Middleware\EmpresaContext::class,
+        'empresa.required' => \App\Http\Middleware\RequiereEmpresaSeleccionada::class,
+        'tenancia.publica' => \App\Http\Middleware\TenanciaPublica::class,
     ];
 }

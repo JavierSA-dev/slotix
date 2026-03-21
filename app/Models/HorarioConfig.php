@@ -34,7 +34,10 @@ class HorarioConfig extends Model
 
     public static function enMantenimiento(): bool
     {
-        return (bool) cache()->remember('mantenimiento_activo', 60, function () {
+        $tenantSlug = tenancy()->initialized ? tenancy()->tenant->getTenantKey() : 'central';
+        $key = 'mantenimiento_activo_'.$tenantSlug;
+
+        return (bool) cache()->remember($key, 60, function () {
             return static::where('activo', true)->value('en_mantenimiento') ?? false;
         });
     }

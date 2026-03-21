@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>@yield('title', 'Panel') | Minigolf Córdoba</title>
+    <title>@yield('title', 'Panel') | {{ isset($empresaMaster) && $empresaMaster ? $empresaMaster->nombre : 'Panel' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Panel de administración de Minigolf Córdoba. Gestiona reservas, horarios y aforo.">
     <meta name="robots" content="noindex, nofollow">
@@ -13,6 +13,9 @@
     <link rel="shortcut icon" href="{{ URL::asset('build/images/favicon.ico') }}">
     @stack('style')
     @include('layouts.head-css')
+    @if(isset($temaCss) && $temaCss)
+    <style>{!! $temaCss !!}</style>
+    @endif
 </head>
 
 @section('body')

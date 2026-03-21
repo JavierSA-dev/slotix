@@ -13,7 +13,11 @@ class ReservaCanceladaMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public readonly Reserva $reserva, public readonly string $horaFormateada) {}
+    public function __construct(
+        public readonly Reserva $reserva,
+        public readonly string $horaFormateada,
+        public readonly ?string $empresaSlug = null,
+    ) {}
 
     public function envelope(): Envelope
     {

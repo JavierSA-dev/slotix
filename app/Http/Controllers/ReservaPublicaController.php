@@ -6,22 +6,29 @@ use App\Http\Requests\CrearReservaRequest;
 use App\Mail\ReservaCanceladaMail;
 use App\Mail\ReservaConfirmadaMail;
 use App\Models\Reserva;
+use App\Models\User;
+use App\Providers\AppServiceProvider;
+use App\Services\NotificacionService;
 use App\Services\ReservaService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class ReservaPublicaController extends Controller
 {
-    public function __construct(protected ReservaService $reservaService) {}
+    public function __construct(
+        protected ReservaService $reservaService,
+        protected NotificacionService $notificacionService,
+    ) {}
 
     /**
      * Vista pública del calendario (próximos 14 días hábiles).
      */
-    public function index(): View|RedirectResponse
+    public function index(string $empresa): View|RedirectResponse
     {
         if (auth()->check() && auth()->user()->hasAnyRole(['SuperAdmin', 'Admin'])) {
             return redirect()->route('admin.dashboard');
@@ -29,14 +36,16 @@ class ReservaPublicaController extends Controller
 
         $horario = $this->reservaService->getHorarioActivo();
         $fechasDisponibles = $horario ? $this->generarProximas14Fechas() : [];
+        $empresaSlug = $empresa;
+        $temaCss = AppServiceProvider::generarTemaCss(tenancy()->tenant->tema ?? 'neon');
 
-        return view('reservas.public.index', compact('horario', 'fechasDisponibles'));
+        return view('reservas.public.index', compact('horario', 'fechasDisponibles', 'empresaSlug', 'temaCss'));
     }
 
     /**
      * AJAX: devuelve franjas disponibles para una fecha.
      */
-    public function franjas(Request $request): JsonResponse
+    public function franjas(string $empresa, Request $request): JsonResponse
     {
         $fecha = Carbon::parse($request->input('fecha'));
         $franjas = $this->reservaService->getFranjasDisponibles($fecha);
@@ -47,7 +56,7 @@ class ReservaPublicaController extends Controller
     /**
      * Crear nueva reserva.
      */
-    public function store(CrearReservaRequest $request): JsonResponse
+    public function store(string $empresa, CrearReservaRequest $request): JsonResponse
     {
         $data = $request->validated();
         $horaInicio = (float) $data['hora_inicio'];
@@ -62,12 +71,13 @@ class ReservaPublicaController extends Controller
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
         $horaFinFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
 
-        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada));
+        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, $empresa));
+        $this->notificacionService->nuevaReserva($reserva, $empresa, $horaFormateada);
 
         return response()->json([
             'message' => '¡Reserva recibida! En breve recibirás un email de confirmación.',
             'token' => $reserva->token,
-            'url' => route('reservas.show', $reserva->token),
+            'url' => route('reservas.show', [$empresa, $reserva->token]),
             'google_calendar_url' => $this->buildGoogleCalendarUrl($reserva, $horaFormateada, $horaFinFormateada),
         ]);
     }
@@ -75,20 +85,22 @@ class ReservaPublicaController extends Controller
     /**
      * Ver detalle de reserva por token.
      */
-    public function show(string $token): View
+    public function show(string $empresa, string $token): View
     {
         $reserva = Reserva::where('token', $token)->firstOrFail();
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
         $horaFinFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
         $googleCalendarUrl = $this->buildGoogleCalendarUrl($reserva, $horaFormateada, $horaFinFormateada);
+        $empresaSlug = $empresa;
+        $temaCss = AppServiceProvider::generarTemaCss(tenancy()->tenant->tema ?? 'neon');
 
-        return view('reservas.public.show', compact('reserva', 'horaFormateada', 'horaFinFormateada', 'googleCalendarUrl'));
+        return view('reservas.public.show', compact('reserva', 'horaFormateada', 'horaFinFormateada', 'googleCalendarUrl', 'empresaSlug', 'temaCss'));
     }
 
     /**
      * Cancelar reserva por token.
      */
-    public function cancelar(string $token): JsonResponse
+    public function cancelar(string $empresa, string $token): JsonResponse
     {
         $reserva = Reserva::where('token', $token)->firstOrFail();
 
@@ -115,7 +127,8 @@ class ReservaPublicaController extends Controller
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
 
         $this->reservaService->cancelarReserva($reserva);
-        Mail::to($reserva->email)->send(new ReservaCanceladaMail($reserva, $horaFormateada));
+        Mail::to($reserva->email)->send(new ReservaCanceladaMail($reserva, $horaFormateada, $empresa));
+        $this->notificacionService->reservaCancelada($reserva, $empresa, $horaFormateada);
 
         return response()->json(['message' => 'Reserva cancelada correctamente.']);
     }
@@ -152,6 +165,36 @@ class ReservaPublicaController extends Controller
         }
 
         return $fechas;
+    }
+
+    /**
+     * Auto-login para acceso rápido en modo demo.
+     */
+    public function demoAcceder(string $empresa, string $tipo): RedirectResponse
+    {
+        if (! str_starts_with($empresa, 'demo_')) {
+            abort(403);
+        }
+
+        $email = $tipo === 'admin'
+            ? "admin_{$empresa}@demo.slotix.app"
+            : "user_{$empresa}@demo.slotix.app";
+
+        $user = User::where('email', $email)->first();
+
+        if (! $user) {
+            abort(404);
+        }
+
+        Auth::login($user);
+
+        if ($tipo === 'admin') {
+            session(['empresa_id' => $empresa]);
+
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('reservas.public.index', $empresa);
     }
 
     /**

@@ -1,7 +1,6 @@
-# Minigolf Córdoba — Sistema de Reservas
+# Minigolf Reservas — Plataforma Multi-Tenant
 
-Sistema de reservas online para un campo de minigolf, construido con Laravel 11.  
-Permite a los clientes reservar partidas, gestionar sus citas y al personal administrar el calendario de forma sencilla.
+Sistema de gestión de reservas para minigolf construido con Laravel 11. Soporta múltiples empresas con bases de datos aisladas por empresa (multi-tenant via stancl/tenancy).
 
 ---
 
@@ -36,6 +35,79 @@ Permite a los clientes reservar partidas, gestionar sus citas y al personal admi
 
 ---
 
+## Arquitectura Multi-Tenant
+
+### Base de datos central (`minigolf_reservas`)
+Contiene todos los datos globales:
+- `users` — usuarios (SuperAdmin, Admin, User)
+- `tenants` — empresas (id slug, nombre, logo, colores, activo, en_mantenimiento)
+- `empresa_user` — pivot: qué admins tienen acceso a qué empresas
+- `modulos` + `empresa_modulo` — módulos disponibles y cuáles están activos por empresa
+- Tablas de Spatie (roles, permissions) — globales
+
+### Base de datos por empresa (`empresa_{slug}`)
+Cada empresa tiene su propia BD aislada:
+- `reservas` — reservas de esa empresa
+- `horario_config` — configuración de horario y aforo
+
+### Cómo funciona el contexto de empresa
+1. `RequiereEmpresaSeleccionada` middleware: asigna la primera empresa accesible en sesión si no hay ninguna.
+2. `EmpresaContext` middleware: lee `empresa_id` de sesión, valida acceso del usuario y llama a `tenancy()->initialize($empresa)` para activar la BD de la empresa.
+3. Al terminar el request, `tenancy()->end()` restaura la conexión central.
+4. Si hay varias empresas disponibles, el selector en el topbar permite cambiar entre ellas.
+
+### Roles y acceso
+
+| Rol | Acceso |
+|-----|--------|
+| **SuperAdmin** | Panel de todas las empresas. Puede crear/editar/eliminar empresas, activar módulos y migrar BDs. |
+| **Admin** | Panel de las empresas asignadas (via `empresa_user`). Gestiona reservas, horarios y configuración. |
+| **User** | Solo `/mis-reservas`. Sin acceso al panel admin. |
+
+### Módulos
+
+Los módulos controlan qué secciones aparecen en el sidebar del admin de cada empresa:
+
+| Módulo | Descripción |
+|--------|-------------|
+| `reservas` | Gestión de reservas y horario. Activo por defecto en nuevas empresas. |
+| `eventos` | Gestión de eventos (futuro). |
+| `catalogo` | Catálogo de productos (futuro). |
+| `crm` | Gestión de clientes (futuro). |
+| `informes` | Informes y estadísticas (futuro). |
+
+Para activar/desactivar módulos: Panel Empresas → botón `🧩` → toggles.
+
+### Conexiones de BD en código
+
+| Conexión | Uso |
+|----------|-----|
+| `central` | Modelos globales: `User`, `Empresa`, `Modulo`. Siempre apunta a la BD central. |
+| `tenant` (dinámica) | Activa durante request admin. Modelos: `Reserva`, `HorarioConfig`. |
+
+Los modelos de datos centrales declaran `protected $connection = 'central'`. Los de tenant no declaran conexión (usan la activa por defecto tras `tenancy()->initialize()`).
+
+La relación `Reserva::user()` usa `.setConnection('central')` para cruzar de la BD tenant → BD central.
+
+---
+
+## Añadir migraciones nuevas a las BDs de empresa
+
+Cuando se añade una nueva tabla o columna a las BDs de tenant:
+
+1. Crear el archivo en `database/migrations/tenant/`
+2. Aplicar en todas las empresas existentes:
+
+**Opción A – Panel admin (SuperAdmin):**
+Panel Admin → Empresas → botón amarillo **"Migrar todas las BDs"**
+
+**Opción B – Artisan:**
+```bash
+php artisan tenants:migrate
+```
+
+---
+
 ## Requisitos
 
 - PHP 8.2+
@@ -65,14 +137,23 @@ php artisan key:generate
 # 5. Configurar base de datos en .env
 # DB_DATABASE, DB_USERNAME, DB_PASSWORD
 
-# 6. Ejecutar migraciones y seeders
+# 6. Ejecutar migraciones de BD central
 php artisan migrate
+
+# 7. Crear módulos y empresa inicial
+php artisan db:seed --class=ModuloSeeder
+php artisan db:seed --class=EmpresaSeeder
+
+# 8. Migrar datos existentes al tenant #1 (si aplica)
+php artisan empresa:migrar-inicial
+
+# 9. Crear usuarios base (SuperAdmin, etc.)
 php artisan db:seed
 
-# 7. Compilar assets
+# 10. Compilar assets
 npm run build
 
-# 8. Iniciar servidor de desarrollo
+# 11. Iniciar servidor de desarrollo
 php artisan serve
 ```
 
@@ -105,7 +186,8 @@ Accede al panel de administración en `/admin` y ajusta el horario desde **Horar
 
 ## Tecnologías
 
-- **Backend**: Laravel 11, PHP 8.2, Spatie Permission
+- **Backend**: Laravel 11, PHP 8.2, Spatie Permission, stancl/tenancy v3
 - **Frontend**: Bootstrap 5.3, jQuery, Flatpickr, FullCalendar 6, Vite
-- **Base de datos**: MySQL / MariaDB
+- **Base de datos**: MySQL / MariaDB (BD central + BDs por empresa)
 - **Email**: Laravel Mailable (configurable con Mailtrap, SMTP, etc.)
+- **Tests**: PHPUnit 10, SQLite :memory: con conexión `central` compartida

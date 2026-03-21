@@ -15,10 +15,10 @@ class ActiveUserMiddlewareTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Crear permiso necesario para el sidebar
         Permission::create(['name' => 'users.index']);
-        
+
         Role::create(['name' => 'User']);
     }
 
@@ -30,8 +30,9 @@ class ActiveUserMiddlewareTest extends TestCase
         $user->assignRole('User');
 
         $response = $this->actingAs($user)->get('/home');
-        
-        $response->assertStatus(200);
+
+        // El middleware no bloquea al usuario activo; /home redirige al destino correcto
+        $response->assertRedirect(route('mis-reservas.index'));
     }
 
     public function test_inactive_user_cannot_access_protected_routes(): void
@@ -42,10 +43,10 @@ class ActiveUserMiddlewareTest extends TestCase
         $user->assignRole('User');
 
         $response = $this->actingAs($user)->get('/home');
-        
+
         // Debería ser redirigido o recibir 403
         $this->assertTrue(
-            $response->status() === 403 || 
+            $response->status() === 403 ||
             $response->status() === 302
         );
     }
@@ -61,10 +62,10 @@ class ActiveUserMiddlewareTest extends TestCase
         $this->assertAuthenticated();
 
         $response = $this->get('/home');
-        
+
         // Después de intentar acceder, debería estar deslogueado
         $this->assertTrue(
-            $response->status() === 403 || 
+            $response->status() === 403 ||
             $response->status() === 302
         );
     }
@@ -79,16 +80,16 @@ class ActiveUserMiddlewareTest extends TestCase
         // Login exitoso
         $this->actingAs($user);
         $response = $this->get('/home');
-        $response->assertStatus(200);
+        $response->assertRedirect(route('mis-reservas.index'));
 
         // Desactivar usuario
         $user->update(['activo' => 0]);
 
         // Intentar acceder de nuevo
         $response = $this->get('/home');
-        
+
         $this->assertTrue(
-            $response->status() === 403 || 
+            $response->status() === 403 ||
             $response->status() === 302
         );
     }

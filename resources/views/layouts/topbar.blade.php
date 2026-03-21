@@ -27,6 +27,42 @@
         </div>
 
         <div class="d-flex">
+            {{-- SELECTOR DE EMPRESA (SuperAdmin y Admin con múltiples empresas) --}}
+            @hasanyrole('SuperAdmin|Admin')
+            @if(isset($empresasDisponibles) && $empresasDisponibles->count() > 1)
+            <div class="d-flex align-items-center px-2">
+                <div class="dropdown d-inline-block">
+                    <button type="button" class="btn btn-sm header-item waves-effect d-flex align-items-center gap-2"
+                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                        title="Cambiar empresa">
+                        <i class="bx bx-buildings font-size-16"></i>
+                        <span class="d-none d-xl-inline-block font-size-13">{{ $empresaActual?->nombre ?? 'Sin empresa' }}</span>
+                        <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end" style="min-width:200px;">
+                        <h6 class="dropdown-header">Seleccionar empresa</h6>
+                        @foreach($empresasDisponibles as $emp)
+                        <a class="dropdown-item empresa-switch-item {{ $empresaActual && $empresaActual->id === $emp->id ? 'active' : '' }}"
+                           href="javascript:void(0)" data-empresa-id="{{ $emp->id }}">
+                            <i class="bx bx-buildings me-1"></i>
+                            {{ $emp->nombre }}
+                            @if($empresaActual && $empresaActual->id === $emp->id)
+                                <i class="bx bx-check ms-1 text-success"></i>
+                            @endif
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @elseif(isset($empresaActual) && $empresaActual)
+            <div class="d-flex align-items-center px-2">
+                <span class="d-none d-xl-inline-block font-size-13 text-muted">
+                    <i class="bx bx-buildings me-1"></i>{{ $empresaActual->nombre }}
+                </span>
+            </div>
+            @endif
+            @endhasanyrole
+
             {{-- TOGGLE - Mantenimiento (solo admins) --}}
             @hasanyrole('SuperAdmin|Admin')
             <div class="d-flex align-items-center px-2" id="mantenimiento-toggle-wrapper"
@@ -41,6 +77,33 @@
                            id="switch-mantenimiento"
                            style="width:2.2em; height:1.2em; cursor:pointer;"
                            {{ $enMantenimiento ? 'checked' : '' }}>
+                </div>
+            </div>
+            @endhasanyrole
+
+            {{-- CAMPANITA DE NOTIFICACIONES (solo admins) --}}
+            @hasanyrole('SuperAdmin|Admin')
+            <div class="dropdown d-inline-block" id="notif-dropdown">
+                <button type="button"
+                        class="btn header-item noti-icon waves-effect"
+                        id="btn-notificaciones"
+                        data-bs-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        data-url="{{ route('admin.notificaciones.index') }}"
+                        data-leida-url="{{ url('admin/notificaciones') }}"
+                        title="Notificaciones">
+                    <i class="bx bx-bell"></i>
+                    <span class="badge bg-danger rounded-pill d-none" id="notif-badge">0</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end p-0" style="width: 330px; max-height: 420px; overflow-y: auto;" id="notif-panel">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold font-size-14">Notificaciones</span>
+                        <a href="javascript:void(0)" id="btn-marcar-todas-leidas" class="font-size-12 text-muted">Marcar todas como leídas</a>
+                    </div>
+                    <div id="notif-lista">
+                        <div class="text-center text-muted py-3 font-size-13">Cargando...</div>
+                    </div>
                 </div>
             </div>
             @endhasanyrole
@@ -73,6 +136,26 @@
         </div>
     </div>
 </header>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.empresa-switch-item').forEach(function (el) {
+        el.addEventListener('click', function () {
+            var empresaId = this.dataset.empresaId;
+            fetch('{{ route('admin.switch.empresa') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ empresa_id: empresaId })
+            }).then(function () {
+                window.location.reload();
+            });
+        });
+    });
+});
+</script>
 
 <div class="modal fade change-password" tabindex="-1" role="dialog" aria-labelledby="changePasswordLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

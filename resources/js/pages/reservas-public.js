@@ -26,6 +26,7 @@ $(function () {
     // ─── CHIPS DE FECHAS ───────────────────────────────────────
 
     const fechas = window.mgFechas || [];
+    const empresaSlug = window.mgEmpresaSlug || '';
     const $tira = $('#mg-fechas');
 
     if ($tira.length && fechas.length) {
@@ -64,7 +65,7 @@ $(function () {
         $franjasWrapper.html('<div class="mg-loading"><div class="spinner-border" role="status"></div></div>');
 
         $.ajax({
-            url: '/reservas/franjas',
+            url: '/' + empresaSlug + '/franjas',
             method: 'GET',
             data: { fecha: fecha },
             success: function (franjas) {
@@ -123,7 +124,7 @@ $(function () {
         $('[data-field-error]').text('');
 
         $.ajax({
-            url: '/reservas',
+            url: '/' + empresaSlug + '/reservas',
             method: 'POST',
             data: $('#form-reserva').serialize(),
             success: function (response) {

@@ -78,13 +78,27 @@
                         <div class="col-12 col-md-8 mt-2">
                             <div class="mb-3">
                                 <label for="userModalRoles" class="form-label">@lang('translation.Roles') <span class="text-danger">*</span></label>
-                                <select class="form-control" id="userModalRoles" name="role[]" multiple>
+                                <select class="form-control" id="userModalRoles" name="role">
                                     @foreach ($roles as $role)
                                         <option value="{{ $role->name }}">{{ $role->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
+
+                        {{-- Empresas --}}
+                        @if(isset($empresas) && $empresas->isNotEmpty())
+                        <div class="col-12 mt-2">
+                            <div class="mb-3">
+                                <label for="userModalEmpresas" class="form-label">Empresas</label>
+                                <select class="form-control" id="userModalEmpresas" name="empresas[]" multiple>
+                                    @foreach($empresas as $empresa)
+                                        <option value="{{ $empresa->id }}">{{ $empresa->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        @endif
 
                         {{-- Activo --}}
                         <div class="col-12 col-md-4 mt-2 d-flex align-items-center">
@@ -134,7 +148,7 @@ $(function () {
         formId: 'userModalForm',
         triggerCreateSelector: '#createUserButton',
         triggerEditSelector: '.btn-edit-user',
-        select2Selectors: ['#userModalRoles'],
+        select2Selectors: ['#userModalRoles', '#userModalEmpresas'],
         select2Options: { placeholder: '{{ __('translation.Seleccione') }}...' },
         getUrl: (id) => id ? '/users/' + id : '/users',
 
@@ -156,12 +170,18 @@ $(function () {
             document.getElementById('userModalEmail').value       = user.email;
             document.getElementById('userModalActivo').checked    = !!user.activo;
             if (user.avatar) { avatarPreview.src = user.avatar; }
-            $('#userModalRoles').val(user.roles).trigger('change');
+            $('#userModalRoles').val(user.role).trigger('change');
+            if (document.getElementById('userModalEmpresas')) {
+                $('#userModalEmpresas').val(user.empresas || []).trigger('change');
+            }
         },
 
         onReset: () => {
             avatarPreview.src = defaultAvatar;
             avatarInput.value = '';
+            if (document.getElementById('userModalEmpresas')) {
+                $('#userModalEmpresas').val(null).trigger('change');
+            }
         },
 
         onBeforeSubmit: (formData) => {

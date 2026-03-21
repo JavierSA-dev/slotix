@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\DataTables\ReservaDataTableConfig;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminActualizarReservaRequest;
 use App\Http\Requests\AdminCrearReservaRequest;
+use App\Mail\ReservaCanceladaMail;
 use App\Mail\ReservaConfirmadaMail;
 use App\Models\Reserva;
 use App\Models\User;
+use App\Services\NotificacionService;
 use App\Services\ReservaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,7 +20,10 @@ use Yajra\DataTables\Facades\DataTables;
 
 class AdminReservasController extends Controller
 {
-    public function __construct(protected ReservaService $reservaService) {}
+    public function __construct(
+        protected ReservaService $reservaService,
+        protected NotificacionService $notificacionService,
+    ) {}
 
     public function index(): View
     {
@@ -51,6 +57,59 @@ class AdminReservasController extends Controller
             ->make(true);
     }
 
+    public function show(Reserva $reserva): JsonResponse
+    {
+        $horaInicio = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+        $horaFin = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
+
+        return response()->json([
+            'id' => $reserva->id,
+            'nombre' => $reserva->nombre,
+            'email' => $reserva->email,
+            'telefono' => $reserva->telefono,
+            'fecha' => $reserva->fecha->format('Y-m-d'),
+            'fecha_fmt' => $reserva->fecha->format('d/m/Y'),
+            'hora_inicio' => $horaInicio,
+            'hora_fin' => $horaFin,
+            'num_personas' => $reserva->num_personas,
+            'estado' => $reserva->estado,
+            'notas' => $reserva->notas,
+            'token' => $reserva->token,
+        ]);
+    }
+
+    public function update(AdminActualizarReservaRequest $request, Reserva $reserva): JsonResponse
+    {
+        $data = $request->validated();
+        $estadoAnterior = $reserva->estado;
+        $fechaAnterior = $reserva->fecha->format('d/m/Y');
+        $fechaCambiada = $reserva->fecha->format('Y-m-d') !== $data['fecha'];
+
+        $horaInicio = (float) $data['hora_inicio'];
+        $horario = $this->reservaService->getHorarioActivo();
+        $duracion = $horario ? $horario->duracion_tramo : 1;
+        $data['hora_fin'] = $horaInicio + $duracion;
+
+        $reserva->update($data);
+        $reserva->refresh();
+
+        $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+        $empresaSlug = session('empresa_id', '');
+
+        if ($estadoAnterior !== 'confirmada' && $reserva->estado === 'confirmada') {
+            Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, $empresaSlug));
+        } elseif ($estadoAnterior !== 'cancelada' && $reserva->estado === 'cancelada') {
+            Mail::to($reserva->email)->send(new ReservaCanceladaMail($reserva, $horaFormateada, $empresaSlug));
+            $this->notificacionService->reservaCancelada($reserva, $empresaSlug, $horaFormateada);
+        }
+
+        if ($fechaCambiada) {
+            $this->notificacionService->reservaCambioFecha($reserva, $empresaSlug, $horaFormateada, $fechaAnterior);
+        }
+
+        return response()->json(['message' => 'Reserva actualizada correctamente.']);
+    }
+
     public function confirmar(Reserva $reserva): JsonResponse
     {
         if ($reserva->estado !== 'pendiente') {
@@ -59,7 +118,7 @@ class AdminReservasController extends Controller
 
         $reserva->update(['estado' => 'confirmada']);
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
-        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada));
+        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, session('empresa_id', '')));
 
         return response()->json(['message' => 'Reserva confirmada.']);
     }
@@ -80,7 +139,7 @@ class AdminReservasController extends Controller
         $data = $request->validated();
         $reserva = $this->reservaService->crearReserva($data);
         $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
-        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada));
+        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, session('empresa_id', '')));
 
         return response()->json(['message' => 'Reserva creada correctamente.', 'id' => $reserva->id]);
     }
@@ -93,23 +152,30 @@ class AdminReservasController extends Controller
         $reservas = Reserva::whereBetween('fecha', [
             substr($start, 0, 10),
             substr($end, 0, 10),
-        ])
-            ->whereIn('estado', ['pendiente', 'confirmada'])
-            ->get();
+        ])->get();
 
-        $events = $reservas->map(function ($r) {
+        $colores = [
+            'confirmada' => ['bg' => '#2a5228', 'border' => '#3a7038'],
+            'cancelada' => ['bg' => '#5a1a1a', 'border' => '#8b2222'],
+            'pendiente' => ['bg' => '#856404', 'border' => '#c19849'],
+        ];
+
+        $events = $reservas->map(function ($r) use ($colores) {
             $horaInicio = $this->reservaService->decimalAHora((float) $r->hora_inicio);
             $horaFin = $this->reservaService->decimalAHora((float) $r->hora_fin);
+            $color = $colores[$r->estado] ?? $colores['pendiente'];
 
             return [
                 'id' => $r->id,
                 'title' => $r->nombre.' ('.$r->num_personas.'p)',
                 'start' => $r->fecha->format('Y-m-d').'T'.$horaInicio.':00',
                 'end' => $r->fecha->format('Y-m-d').'T'.$horaFin.':00',
-                'backgroundColor' => $r->estado === 'confirmada' ? '#2a5228' : '#856404',
-                'borderColor' => $r->estado === 'confirmada' ? '#3a7038' : '#c19849',
+                'backgroundColor' => $color['bg'],
+                'borderColor' => $color['border'],
                 'textColor' => '#ffffff',
+                'editable' => $r->estado !== 'cancelada',
                 'extendedProps' => [
+                    'reserva_id' => $r->id,
                     'estado' => $r->estado,
                     'email' => $r->email,
                     'telefono' => $r->telefono,

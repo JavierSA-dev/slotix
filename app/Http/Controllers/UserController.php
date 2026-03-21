@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DataTables\UserDataTableConfig;
 use App\Exports\UsersExport;
 use App\Http\Requests\UserRequest;
+use App\Models\Empresa;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
@@ -30,13 +31,14 @@ class UserController extends Controller
     {
         $config = new UserDataTableConfig;
         $roles = auth()->user()->getAssignableRoleModels();
+        $empresas = $this->getEmpresasParaModal();
 
-        return view('users.index', compact('config', 'roles'));
+        return view('users.index', compact('config', 'roles', 'empresas'));
     }
 
     public function getAjax(Request $request): JsonResponse
     {
-        $query = User::with('roles')->select(['id', 'name', 'email', 'avatar', 'activo', 'created_at']);
+        $query = User::with(['roles', 'empresas'])->select(['id', 'name', 'email', 'avatar', 'activo', 'created_at']);
 
         $this->applyFilters($query, $request);
 
@@ -51,6 +53,9 @@ class UserController extends Controller
             })
             ->addColumn('rol', function ($row) {
                 return $row->roles->pluck('name')->implode(', ') ?: '-';
+            })
+            ->addColumn('empresas', function ($row) {
+                return $row->empresas->pluck('nombre')->implode(', ') ?: '-';
             })
             ->addColumn('activo', function ($row) {
                 return $row->activo
@@ -137,7 +142,8 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'activo' => $user->activo,
-                'roles' => $user->roles->pluck('name'),
+                'role' => $user->roles->first()?->name,
+                'empresas' => $user->empresas->pluck('id'),
                 'avatar' => $user->avatar
                     ? asset('storage/avatares/'.$user->avatar)
                     : null,
@@ -209,5 +215,24 @@ class UserController extends Controller
                 $query->whereDate('created_at', $date);
             }
         }
+
+        if ($request->filled('empresa')) {
+            $query->whereHas('empresas', fn ($q) => $q->where('tenants.id', $request->input('empresa')));
+        }
+    }
+
+    private function getEmpresasParaModal(): \Illuminate\Support\Collection
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('SuperAdmin')) {
+            return Empresa::where('activo', true)->orderBy('nombre')->get();
+        }
+
+        if ($user->hasAnyRole(['Admin'])) {
+            return $user->empresas()->where('tenants.activo', true)->orderBy('nombre')->get();
+        }
+
+        return collect();
     }
 }

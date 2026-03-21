@@ -4,9 +4,9 @@
         <div id="sidebar-menu">
             <ul class="metismenu list-unstyled" id="side-menu">
 
-                {{-- MINIGOLF --}}
+                {{-- PANEL ADMIN --}}
                 @hasanyrole('SuperAdmin|Admin')
-                <li class="menu-title">Minigolf</li>
+                <li class="menu-title">Gestión</li>
 
                 <li>
                     <a href="/admin" class="waves-effect">
@@ -15,6 +15,7 @@
                     </a>
                 </li>
 
+                @if(isset($modulosActivos) && $modulosActivos->contains('reservas'))
                 <li>
                     <a href="/admin/reservas" class="waves-effect">
                         <i class="bx bx-calendar-check"></i>
@@ -28,6 +29,16 @@
                         <span>Horario y aforo</span>
                     </a>
                 </li>
+                @endif
+
+                @role('Admin')
+                <li>
+                    <a href="{{ route('admin.mi-empresa.index') }}" class="waves-effect">
+                        <i class="bx bx-buildings"></i>
+                        <span>Mi empresa</span>
+                    </a>
+                </li>
+                @endrole
                 @endhasanyrole
 
                 {{-- USUARIO AUTENTICADO (solo usuarios sin rol admin) --}}
@@ -47,6 +58,20 @@
                 {{-- ADMINISTRACIÓN (solo SuperAdmin) --}}
                 @role('SuperAdmin')
                 <li class="menu-title">Administración</li>
+
+                <li>
+                    <a href="/admin/empresas" class="waves-effect">
+                        <i class="bx bx-buildings"></i>
+                        <span>Empresas</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('admin.demos.index') }}" class="waves-effect">
+                        <i class="bx bx-play-circle"></i>
+                        <span>Demos</span>
+                    </a>
+                </li>
 
                 <li>
                     <a href="/users" class="waves-effect">

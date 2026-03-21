@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\HorarioConfig;
+use App\Models\Empresa;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,8 +22,14 @@ class CheckMaintenanceMode
         }
 
         try {
-            if (HorarioConfig::enMantenimiento()) {
-                return response()->view('mantenimiento.public', [], 503);
+            // Leemos en_mantenimiento de la Empresa (BD central) para evitar
+            // problemas cuando el tenant aún no está inicializado en este middleware global
+            $empresaId = session('empresa_id');
+            if ($empresaId) {
+                $empresa = Empresa::find($empresaId);
+                if ($empresa && $empresa->en_mantenimiento) {
+                    return response()->view('mantenimiento.public', [], 503);
+                }
             }
         } catch (\Exception $e) {
             // Si hay error de BD, no bloqueamos

@@ -2,7 +2,7 @@
     <div class="mg-empty-state">
         <div class="mg-empty-icon">📅</div>
         <p>No hay reservas para el rango seleccionado.</p>
-        <a href="{{ route('reservas.public.index') }}" class="btn btn-mg-primary mt-2">Hacer una reserva</a>
+        <p class="text-muted small mt-2">Accede a la página de tu empresa para hacer una reserva.</p>
     </div>
 @else
     <div class="mg-mis-reservas-grid">

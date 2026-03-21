@@ -43,8 +43,10 @@
                 </div>
             </div>
 
+            @if($empresaSlug)
             <p style="font-size:13px;color:#777;">Si quieres hacer una nueva reserva, puedes hacerlo aquí:</p>
-            <a href="{{ route('reservas.public.index') }}" class="btn">Hacer nueva reserva</a>
+            <a href="{{ route('reservas.public.index', $empresaSlug) }}" class="btn">Hacer nueva reserva</a>
+            @endif
         </div>
         <div class="footer">
             Minigolf Córdoba · Córdoba, Andalucía

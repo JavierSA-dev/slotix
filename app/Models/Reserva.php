@@ -32,6 +32,7 @@ class Reserva extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        // Usuario en BD central, reserva en BD tenant → se requiere setConnection explícito
+        return $this->belongsTo(User::class)->setConnection('central');
     }
 }

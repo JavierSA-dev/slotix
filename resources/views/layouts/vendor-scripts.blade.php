@@ -75,6 +75,103 @@
 </script>
 @endhasanyrole
 
+@hasanyrole('SuperAdmin|Admin')
+<script>
+(function () {
+    const notifUrl    = document.getElementById('btn-notificaciones')?.dataset.url;
+    const leidaUrl    = document.getElementById('btn-notificaciones')?.dataset.leidaUrl;
+    const csrfToken   = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    if (!notifUrl) return;
+
+    const $badge  = $('#notif-badge');
+    const $lista  = $('#notif-lista');
+
+    const iconos = {
+        nueva_reserva: 'bx-calendar-plus text-success',
+        cancelacion:   'bx-calendar-x text-danger',
+        cambio_fecha:  'bx-calendar-event text-warning',
+        cambio_estado: 'bx-check-circle text-info',
+    };
+
+    const etiquetas = {
+        nueva_reserva: 'Nueva reserva',
+        cancelacion:   'Reserva cancelada',
+        cambio_fecha:  'Cambio de fecha',
+        cambio_estado: 'Cambio de estado',
+    };
+
+    function cargarNotificaciones() {
+        $.getJSON(notifUrl, function (data) {
+            const total = data.total || 0;
+
+            if (total > 0) {
+                $badge.text(total > 9 ? '9+' : total).removeClass('d-none');
+            } else {
+                $badge.addClass('d-none');
+            }
+
+            if (!data.notificaciones || data.notificaciones.length === 0) {
+                $lista.html('<div class="text-center text-muted py-3 font-size-13">Sin notificaciones nuevas</div>');
+                return;
+            }
+
+            let html = '';
+            data.notificaciones.forEach(function (n) {
+                const icono = iconos[n.tipo] || 'bx-info-circle text-secondary';
+                const label = etiquetas[n.tipo] || n.tipo;
+                const d = n.datos || {};
+
+                html += `<a href="javascript:void(0)" class="dropdown-item notif-item border-bottom py-2 px-3" data-id="${n.id}">
+                    <div class="d-flex align-items-start gap-2">
+                        <div class="flex-shrink-0 pt-1"><i class="bx ${icono} font-size-18"></i></div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="fw-semibold font-size-13 text-truncate">${label}</div>
+                            <div class="text-muted font-size-12 text-truncate">${d.nombre || ''} · ${d.fecha || ''} ${d.hora || ''}</div>
+                            <div class="text-muted font-size-11">${n.created_at}</div>
+                        </div>
+                    </div>
+                </a>`;
+            });
+
+            $lista.html(html);
+        });
+    }
+
+    // Marcar individual como leída
+    $(document).on('click', '.notif-item', function () {
+        const id = $(this).data('id');
+        $.ajax({
+            url: leidaUrl + '/' + id + '/leida',
+            method: 'POST',
+            data: { _method: 'PATCH', _token: csrfToken },
+            complete: function () { cargarNotificaciones(); }
+        });
+    });
+
+    // Marcar todas como leídas
+    $('#btn-marcar-todas-leidas').on('click', function (e) {
+        e.stopPropagation();
+        $.ajax({
+            url: leidaUrl + '/todas-leidas',
+            method: 'POST',
+            data: { _method: 'PATCH', _token: csrfToken },
+            complete: function () { cargarNotificaciones(); }
+        });
+    });
+
+    // Cargar al abrir el dropdown
+    $('#btn-notificaciones').on('click', function () {
+        cargarNotificaciones();
+    });
+
+    // Polling cada 60 segundos
+    cargarNotificaciones();
+    setInterval(cargarNotificaciones, 60000);
+})();
+</script>
+@endhasanyrole
+
 @yield('script')
 
 @stack('scripts')

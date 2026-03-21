@@ -30,7 +30,7 @@ class UserService
     {
         $userData = collect($data)->except([
             'newpassword', 'newpassword_confirmation',
-            'role', 'permissions', 'avatar',
+            'role', 'permissions', 'avatar', 'empresas',
             '_token', '_method',
         ])->toArray();
 
@@ -41,6 +41,7 @@ class UserService
         $user = User::create($userData);
 
         $this->syncRolesAndPermissions($user, $data);
+        $this->syncEmpresas($user, $data);
 
         return $user;
     }
@@ -53,7 +54,7 @@ class UserService
         // Filtrar campos que no deben actualizarse directamente
         $updateData = collect($data)->except([
             'avatar', 'newpassword', 'newpassword_confirmation',
-            'role', 'permissions', 'password',
+            'role', 'permissions', 'password', 'empresas',
         ])->toArray();
 
         $user->update($updateData);
@@ -65,6 +66,7 @@ class UserService
 
         // Sincronizar roles y permisos
         $this->syncRolesAndPermissions($user, $data);
+        $this->syncEmpresas($user, $data);
 
         return $user;
     }
@@ -95,7 +97,8 @@ class UserService
     public function syncRolesAndPermissions(User $user, array $data): void
     {
         if (array_key_exists('role', $data)) {
-            $roles = $data['role'] ?? [];
+            $role = $data['role'] ?? null;
+            $roles = $role ? [$role] : [];
 
             // Filtrar roles según jerarquía del usuario autenticado (defensa en profundidad)
             if (auth()->check()) {
@@ -108,6 +111,13 @@ class UserService
 
         if (array_key_exists('permissions', $data)) {
             $user->syncPermissions($data['permissions'] ?? []);
+        }
+    }
+
+    public function syncEmpresas(User $user, array $data): void
+    {
+        if (array_key_exists('empresas', $data)) {
+            $user->empresas()->sync($data['empresas'] ?? []);
         }
     }
 

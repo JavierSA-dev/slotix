@@ -26,6 +26,7 @@ class UserDataTableConfig extends DataTableConfig
             Column::make('Nombre', 'name'),
             Column::make('Email', 'email'),
             Column::make('Rol', 'rol')->orderable(false),
+            Column::make('Empresas', 'empresas')->orderable(false)->searchable(false),
             Column::make('Activo', 'activo')->className('text-center'),
             Column::make(__('Acciones'), 'action')->orderable(false)->searchable(false),
         ];
@@ -42,6 +43,11 @@ class UserDataTableConfig extends DataTableConfig
                 ->fromRoute('roles.rolesAjax')
                 ->placeholder('Selecciona un rol')
                 ->style('max-width: 150px;'),
+
+            SelectFilter::make('empresa')
+                ->fromRoute('admin.empresas.listAjax')
+                ->placeholder('Todas las empresas')
+                ->style('max-width: 180px;'),
         ];
     }
 

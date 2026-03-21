@@ -113,6 +113,18 @@
       0 => 'Spatie\\Permission\\PermissionServiceProvider',
     ),
   ),
+  'stancl/tenancy' => 
+  array (
+    'aliases' => 
+    array (
+      'Tenancy' => 'Stancl\\Tenancy\\Facades\\Tenancy',
+      'GlobalCache' => 'Stancl\\Tenancy\\Facades\\GlobalCache',
+    ),
+    'providers' => 
+    array (
+      0 => 'Stancl\\Tenancy\\TenancyServiceProvider',
+    ),
+  ),
   'yajra/laravel-datatables-buttons' => 
   array (
     'providers' => 

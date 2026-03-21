@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <title>Crear cuenta | Minigolf Córdoba</title>
+    <title>Crear cuenta | Slotix</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Crea tu cuenta para gestionar tus reservas en Minigolf Córdoba fácilmente.">
+    <meta name="description" content="Crea tu cuenta para gestionar tus reservas fácilmente.">
     <link rel="shortcut icon" href="{{ URL::asset('build/images/favicon.ico') }}">
     <link rel="stylesheet" href="{{ URL::asset('build/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ URL::asset('build/css/icons.min.css') }}">
@@ -16,8 +16,8 @@
     <div class="w-100" style="max-width:420px; padding:1.5rem;">
 
         <div class="text-center mb-4">
-            <a href="{{ route('reservas.public.index') }}" class="mg-logo-text" style="font-size:1.6rem;">
-                Minigolf <span>Córdoba</span>
+            <a href="{{ route('login') }}" class="mg-logo-text" style="font-size:1.6rem;">
+                Sloti<span>x</span>
             </a>
         </div>
 
@@ -107,7 +107,7 @@
         </div>
 
         <p class="text-center mt-3" style="font-size:.8rem; color:var(--mg-text-muted);">
-            <a href="{{ route('reservas.public.index') }}" style="color:var(--mg-text-muted); text-decoration:none;">
+            <a href="{{ route('login') }}" style="color:var(--mg-text-muted); text-decoration:none;">
                 <i class="bx bx-arrow-back me-1"></i>Volver a reservas
             </a>
         </p>

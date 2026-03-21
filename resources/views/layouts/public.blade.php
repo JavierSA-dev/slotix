@@ -2,33 +2,41 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <title>@yield('title', 'Reservas') | Minigolf Córdoba</title>
+    <title>@yield('title', 'Reservas') | {{ $empresaNombre ?? 'Slotix' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="@yield('meta-description', 'Reserva online tu partida de minigolf en Córdoba, Andalucía. Elige fecha, horario y disfruta en familia.')">
-    <meta name="keywords" content="minigolf Córdoba, reservas minigolf, ocio Córdoba, minigolf familiar">
+    <meta name="description" content="@yield('meta-description', 'Reserva tu cita online de forma rápida y sencilla.')">
     <meta name="theme-color" content="#120d02">
-    <meta property="og:title" content="@yield('title', 'Reservas') | Minigolf Córdoba">
-    <meta property="og:description" content="@yield('meta-description', 'Reserva online tu partida de minigolf en Córdoba, Andalucía.')">
+    <meta property="og:title" content="@yield('title', 'Reservas') | {{ $empresaNombre ?? 'Slotix' }}">
+    <meta property="og:description" content="@yield('meta-description', 'Reserva tu cita online.')">
     <meta property="og:type" content="website">
     <link rel="shortcut icon" href="{{ URL::asset('build/images/favicon.ico') }}">
     <link rel="stylesheet" href="{{ URL::asset('build/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ URL::asset('build/css/icons.min.css') }}">
     @vite(['resources/scss/custom/views/public-reservas.scss'])
     @stack('styles')
+    @if(isset($temaCss) && $temaCss)
+    <style>{!! $temaCss !!}</style>
+    @endif
 </head>
 <body class="mg-body">
 
     <header class="mg-header">
         <div class="d-flex justify-content-between align-items-center">
-            <a href="{{ route('reservas.public.index') }}" class="mg-logo-link">
-                <img src="{{ URL::asset('images/logo_minigolf.jpg') }}"
-                     alt="Minigolf Córdoba"
-                     class="mg-logo-img">
+            <a href="{{ isset($empresaSlug) ? route('reservas.public.index', $empresaSlug) : route('login') }}" class="mg-logo-link">
+                @if(isset($empresaLogo) && $empresaLogo)
+                    <img src="{{ $empresaLogo }}" alt="{{ $empresaNombre ?? 'Logo' }}" class="mg-logo-img">
+                @else
+                    <span class="mg-logo-text">{{ $empresaNombre ?? 'Slotix' }}</span>
+                @endif
             </a>
             <nav class="mg-nav-links d-flex align-items-center gap-3">
                 @guest
-                    <a href="{{ route('login') }}">Acceder</a>
+                    @if(isset($esDemo) && $esDemo)
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#modal-demo-acceso">Acceder</a>
+                    @else
+                        <a href="{{ route('login') }}">Acceder</a>
+                    @endif
                 @endguest
                 @auth
                     <div class="dropdown">
@@ -55,6 +63,16 @@
         </div>
     </header>
 
+    @if(isset($esDemo) && $esDemo)
+    <div style="background:#c19849;color:#0d0901;text-align:center;padding:8px 16px;font-size:.85rem;font-weight:600;">
+        <i class="bx bx-play-circle me-1"></i>
+        MODO DEMO &mdash; Estás viendo una versión de prueba.
+        @if(isset($demoExpiraEn) && $demoExpiraEn)
+            Tu acceso expira el {{ $demoExpiraEn->format('d/m/Y') }}.
+        @endif
+    </div>
+    @endif
+
     <main class="mg-main">
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
@@ -64,6 +82,10 @@
         @endif
         @yield('content')
     </main>
+
+    @if(isset($esDemo) && $esDemo)
+        @include('layouts.partials.modal-demo-acceso')
+    @endif
 
     <script src="{{ URL::asset('build/libs/jquery/jquery.min.js') }}"></script>
     <script src="{{ URL::asset('build/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>

@@ -101,7 +101,7 @@
         @else
             <div class="mt-4 text-center no-print">
                 <p class="text-muted small">Esta reserva ha sido cancelada.</p>
-                <a href="{{ route('reservas.public.index') }}" class="btn btn-mg-primary">Hacer nueva reserva</a>
+                <a href="{{ route('reservas.public.index', $empresaSlug) }}" class="btn btn-mg-primary">Hacer nueva reserva</a>
             </div>
         @endif
     </div>
@@ -137,7 +137,7 @@ $(function () {
         $btn.prop('disabled', true).html('<i class="bx bx-loader-alt bx-spin me-1"></i>Cancelando...');
 
         $.ajax({
-            url: '/reservas/{{ $reserva->token }}/cancelar',
+            url: '{{ route('reservas.cancelar', [$empresaSlug, $reserva->token]) }}',
             method: 'PATCH',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             success: function () {

@@ -2,7 +2,11 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminHorarioController;
+use App\Http\Controllers\Admin\AdminNotificacionController;
 use App\Http\Controllers\Admin\AdminReservasController;
+use App\Http\Controllers\Admin\DemoController;
+use App\Http\Controllers\Admin\EmpresaController;
+use App\Http\Controllers\Admin\EmpresaModuloController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -33,11 +37,7 @@ Auth::routes(['verify' => true, 'register' => true]);
 // ─────────────────────────────────────────────────────────────────────────
 // RUTAS PÚBLICAS (sin autenticación)
 // ─────────────────────────────────────────────────────────────────────────
-Route::get('/', [ReservaPublicaController::class, 'index'])->name('reservas.public.index');
-Route::get('/reservas/franjas', [ReservaPublicaController::class, 'franjas'])->name('reservas.franjas');
-Route::post('/reservas', [ReservaPublicaController::class, 'store'])->name('reservas.store');
-Route::get('/reservas/{token}', [ReservaPublicaController::class, 'show'])->name('reservas.show');
-Route::patch('/reservas/{token}/cancelar', [ReservaPublicaController::class, 'cancelar'])->name('reservas.cancelar');
+Route::get('/', fn () => redirect()->route('login'))->name('inicio');
 
 // ─────────────────────────────────────────────────────────────────────────
 // RUTAS AUTENTICADAS
@@ -61,7 +61,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // ─────────────────────────────────────────────────────────────────────────
     // PANEL ADMIN
     // ─────────────────────────────────────────────────────────────────────────
-    Route::middleware(['es_admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['es_admin', 'empresa.required', 'empresa'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::post('/mantenimiento/toggle', [AdminDashboardController::class, 'toggleMantenimiento'])->name('mantenimiento.toggle');
         Route::get('/horario', [AdminHorarioController::class, 'index'])->name('horario.index');
@@ -70,9 +70,53 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/reservas/calendar-events', [AdminReservasController::class, 'calendarEvents'])->name('reservas.calendarEvents');
         Route::get('/reservas/buscar-usuarios', [AdminReservasController::class, 'buscarUsuarios'])->name('reservas.buscarUsuarios');
         Route::post('/reservas', [AdminReservasController::class, 'storeAdmin'])->name('reservas.store');
+        Route::get('/reservas/{reserva}', [AdminReservasController::class, 'show'])->name('reservas.show');
+        Route::patch('/reservas/{reserva}', [AdminReservasController::class, 'update'])->name('reservas.update');
         Route::patch('/reservas/{reserva}/confirmar', [AdminReservasController::class, 'confirmar'])->name('reservas.confirmar');
         Route::patch('/reservas/{reserva}/cancelar-admin', [AdminReservasController::class, 'cancelarAdmin'])->name('reservas.cancelarAdmin');
         Route::get('/reservas', [AdminReservasController::class, 'index'])->name('reservas.index');
+
+        // ─────────────────────────────────────────────────────────────────────
+        // LISTADO SIMPLE DE EMPRESAS (para filtros y selects)
+        // ─────────────────────────────────────────────────────────────────────
+        Route::get('/empresas/list', [EmpresaController::class, 'listAjax'])->name('empresas.listAjax');
+
+        // ─────────────────────────────────────────────────────────────────────
+        // MI EMPRESA (Admin puede editar su propia empresa)
+        // ─────────────────────────────────────────────────────────────────────
+        Route::get('/mi-empresa', [EmpresaController::class, 'miEmpresa'])->name('mi-empresa.index');
+        Route::put('/mi-empresa', [EmpresaController::class, 'actualizarMiEmpresa'])->name('mi-empresa.update');
+
+        // ─────────────────────────────────────────────────────────────────────
+        // NOTIFICACIONES ADMIN
+        // ─────────────────────────────────────────────────────────────────────
+        Route::get('/notificaciones', [AdminNotificacionController::class, 'index'])->name('notificaciones.index');
+        Route::patch('/notificaciones/{id}/leida', [AdminNotificacionController::class, 'marcarLeida'])->name('notificaciones.leida');
+        Route::patch('/notificaciones/todas-leidas', [AdminNotificacionController::class, 'marcarTodasLeidas'])->name('notificaciones.todasLeidas');
+
+        // ─────────────────────────────────────────────────────────────────────
+        // CAMBIO DE EMPRESA (disponible para admins con múltiples empresas)
+        // ─────────────────────────────────────────────────────────────────────
+        Route::post('/switch-empresa', [EmpresaController::class, 'switchEmpresa'])->name('switch.empresa');
+
+        // ─────────────────────────────────────────────────────────────────────
+        // GESTIÓN DE EMPRESAS (solo SuperAdmin)
+        // ─────────────────────────────────────────────────────────────────────
+        Route::middleware(['role:SuperAdmin'])->group(function () {
+            Route::get('/demos', [DemoController::class, 'index'])->name('demos.index');
+            Route::post('/demos', [DemoController::class, 'store'])->name('demos.store');
+            Route::delete('/demos/{tenantId}', [DemoController::class, 'destroy'])->name('demos.destroy');
+
+            Route::get('/empresas/get-ajax', [EmpresaController::class, 'getAjax'])->name('empresas.getAjax');
+            Route::get('/empresas/{empresa}', [EmpresaController::class, 'show'])->name('empresas.show');
+            Route::post('/empresas', [EmpresaController::class, 'store'])->name('empresas.store');
+            Route::put('/empresas/{empresa}', [EmpresaController::class, 'update'])->name('empresas.update');
+            Route::delete('/empresas/{empresa}', [EmpresaController::class, 'destroy'])->name('empresas.destroy');
+            Route::get('/empresas', [EmpresaController::class, 'index'])->name('empresas.index');
+            Route::post('/empresas/migrar-todas', [EmpresaController::class, 'migrarTodas'])->name('empresas.migrarTodas');
+
+            Route::post('/empresas/{empresa}/modulos/{modulo}/toggle', [EmpresaModuloController::class, 'toggle'])->name('empresas.modulos.toggle');
+        });
     });
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -96,4 +140,18 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('permissions/get-ajax', [PermissionController::class, 'getAjax'])->name('permissions.getAjax');
         Route::resource('permissions', PermissionController::class);
     });
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// RUTAS PÚBLICAS POR EMPRESA — al final para no interferir con otras rutas
+// ─────────────────────────────────────────────────────────────────────────
+Route::prefix('{empresa}')->middleware('tenancia.publica')->group(function () {
+    Route::get('/demo-acceder/{tipo}', [ReservaPublicaController::class, 'demoAcceder'])
+        ->name('demo.acceder')
+        ->where('tipo', 'admin|usuario');
+    Route::get('/', [ReservaPublicaController::class, 'index'])->name('reservas.public.index');
+    Route::get('/franjas', [ReservaPublicaController::class, 'franjas'])->name('reservas.franjas');
+    Route::post('/reservas', [ReservaPublicaController::class, 'store'])->name('reservas.store');
+    Route::get('/reservas/{token}', [ReservaPublicaController::class, 'show'])->name('reservas.show');
+    Route::patch('/reservas/{token}/cancelar', [ReservaPublicaController::class, 'cancelar'])->name('reservas.cancelar');
 });

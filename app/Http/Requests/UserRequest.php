@@ -14,16 +14,6 @@ class UserRequest extends FormRequest
     }
 
     /**
-     * Preparar los datos antes de la validación.
-     */
-    public function prepareForValidation(): void
-    {
-        $this->merge([
-            'role' => $this->input('role', []),
-        ]);
-    }
-
-    /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -46,9 +36,13 @@ class UserRequest extends FormRequest
                 ? 'required|string|min:8|confirmed'
                 : 'nullable|string|min:8|confirmed',
 
-            // Validación de roles
-            'role' => 'nullable|array',
-            'role.*' => [
+            // Empresas asignadas
+            'empresas' => 'nullable|array',
+            'empresas.*' => ['string', Rule::exists('central.tenants', 'id')],
+
+            // Validación de rol (único)
+            'role' => [
+                'nullable',
                 'string',
                 Rule::exists('roles', 'name'),
                 function (string $attribute, mixed $value, Closure $fail) {

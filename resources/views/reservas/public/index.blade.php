@@ -40,6 +40,7 @@
 @push('scripts')
     <script>
         window.mgFechas = @json($fechasDisponibles);
+        window.mgEmpresaSlug = @json($empresaSlug);
     </script>
     @vite(['resources/js/pages/reservas-public.js'])
 @endpush

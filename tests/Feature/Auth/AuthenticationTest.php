@@ -14,12 +14,12 @@ class AuthenticationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Crear roles necesarios
         Role::create(['name' => 'SuperAdmin']);
         Role::create(['name' => 'Admin']);
         Role::create(['name' => 'User']);
-        
+
         // Crear permisos necesarios para evitar errores en vistas
         \Spatie\Permission\Models\Permission::create(['name' => 'users.index']);
     }
@@ -79,7 +79,7 @@ class AuthenticationTest extends TestCase
         $this->assertAuthenticated();
 
         $response = $this->post('/logout');
-        
+
         $this->assertGuest();
         $response->assertRedirect('/');
     }
@@ -87,7 +87,7 @@ class AuthenticationTest extends TestCase
     public function test_guests_cannot_access_protected_routes(): void
     {
         $response = $this->get('/home');
-        
+
         $response->assertRedirect('/login');
     }
 
@@ -97,8 +97,9 @@ class AuthenticationTest extends TestCase
         $user->assignRole('User');
 
         $response = $this->actingAs($user)->get('/home');
-        
-        $response->assertStatus(200);
+
+        // /home redirige según el rol: user → mis-reservas
+        $response->assertRedirect(route('mis-reservas.index'));
     }
 
     public function test_login_validation_requires_email(): void
@@ -162,7 +163,7 @@ class AuthenticationTest extends TestCase
         $user->assignRole('User');
 
         $response = $this->actingAs($user)->get('/login');
-        
+
         $response->assertRedirect('/');
     }
 
@@ -181,7 +182,7 @@ class AuthenticationTest extends TestCase
 
         $response->assertRedirect('/');
         $this->assertAuthenticated();
-        
+
         // Verificar que se creó la cookie de remember
         $response->assertCookie(auth()->guard()->getRecallerName());
     }

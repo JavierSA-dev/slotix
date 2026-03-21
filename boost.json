@@ -3,5 +3,8 @@
         "claude_code"
     ],
     "guidelines": true,
-    "skills": []
+    "herd_mcp": false,
+    "mcp": true,
+    "nightwatch_mcp": false,
+    "sail": false
 }

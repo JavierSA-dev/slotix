@@ -17,7 +17,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/';
+    public const HOME = '/home';
 
     /**
      * The controller namespace for the application.
@@ -66,7 +66,7 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip())->response(function () {
                 return response()->json([
-                    'message' => __('auth.throttle', ['seconds' => 60])
+                    'message' => __('auth.throttle', ['seconds' => 60]),
                 ], 429);
             });
         });
@@ -76,7 +76,7 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('register', function (Request $request) {
             return Limit::perHour(3)->by($request->ip())->response(function () {
                 return response()->json([
-                    'message' => __('auth.throttle', ['seconds' => 3600])
+                    'message' => __('auth.throttle', ['seconds' => 3600]),
                 ], 429);
             });
         });
@@ -86,7 +86,7 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('password-reset', function (Request $request) {
             return Limit::perHour(3)->by($request->ip())->response(function () {
                 return response()->json([
-                    'message' => __('auth.throttle', ['seconds' => 3600])
+                    'message' => __('auth.throttle', ['seconds' => 3600]),
                 ], 429);
             });
         });

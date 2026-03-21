@@ -51,7 +51,7 @@
             </div>
 
             <p style="font-size:13px;color:#777;">Puedes gestionar o cancelar tu reserva desde el siguiente enlace:</p>
-            <a href="{{ route('reservas.show', $reserva->token) }}" class="btn">Gestionar mi reserva</a>
+            <a href="{{ route('reservas.show', [$empresaSlug, $reserva->token]) }}" class="btn">Gestionar mi reserva</a>
 
             <p style="font-size:12px;color:#aaa;margin-top:20px;">¡Nos vemos pronto! ⛳</p>
         </div>

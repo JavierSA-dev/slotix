@@ -7,6 +7,8 @@ use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * A basic test example.
      *
@@ -14,10 +16,9 @@ class ExampleTest extends TestCase
      */
     public function test_example()
     {
-        // La raíz redirige a login si no está autenticado
-        $response = $this->get('/');
+        // La página de login siempre debe ser accesible
+        $response = $this->get('/login');
 
-        $response->assertStatus(302); // Redirect esperado
-        $response->assertRedirect(route('login'));
+        $response->assertStatus(200);
     }
 }
