@@ -28,6 +28,7 @@ Route::middleware(['throttle:login'])->group(function () {
     Route::post('login', [LoginController::class, 'login'])->name('login.post');
 });
 
+
 Route::middleware(['throttle:password-reset'])->group(function () {
     Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
     Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
