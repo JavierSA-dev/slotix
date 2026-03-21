@@ -20,7 +20,7 @@ class CrearReservaRequest extends FormRequest
             'email' => ['required', 'email', 'max:255'],
             'telefono' => ['nullable', 'string', 'max:20'],
             'fecha' => ['required', 'date', 'after_or_equal:today', 'before_or_equal:'.$this->fechaMaxima()],
-            'hora_inicio' => ['required', 'numeric', 'min:0', 'max:23.99'],
+            'hora_inicio' => ['required', 'integer', 'min:0', 'max:1439'],
             'num_personas' => ['required', 'integer', 'min:1', 'max:20'],
             'notas' => ['nullable', 'string', 'max:500'],
         ];

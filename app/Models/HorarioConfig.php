@@ -25,8 +25,8 @@ class HorarioConfig extends Model
     {
         return [
             'dias_semana' => 'array',
-            'hora_apertura' => 'decimal:2',
-            'hora_cierre' => 'decimal:2',
+            'hora_apertura' => 'integer',
+            'hora_cierre' => 'integer',
             'activo' => 'boolean',
             'en_mantenimiento' => 'boolean',
         ];

@@ -18,11 +18,11 @@ class AdminHorarioController extends Controller
         $horario = HorarioConfig::where('activo', true)->first();
 
         $horarioAperturaFmt = $horario
-            ? $this->reservaService->decimalAHora((float) $horario->hora_apertura)
+            ? $this->reservaService->minutosAHora((int) $horario->hora_apertura)
             : '10:00';
 
         $horarioCierreFmt = $horario
-            ? $this->reservaService->decimalAHora((float) $horario->hora_cierre)
+            ? $this->reservaService->minutosAHora((int) $horario->hora_cierre)
             : '20:00';
 
         return view('admin.horario.index', compact('horario', 'horarioAperturaFmt', 'horarioCierreFmt'));

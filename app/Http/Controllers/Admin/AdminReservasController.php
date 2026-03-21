@@ -55,8 +55,8 @@ class AdminReservasController extends Controller
         return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('fecha_fmt', fn ($r) => $r->fecha->format('d/m/Y'))
-            ->addColumn('hora_fmt', fn ($r) => $this->reservaService->decimalAHora((float) $r->hora_inicio)
-                .' - '.$this->reservaService->decimalAHora((float) $r->hora_fin))
+            ->addColumn('hora_fmt', fn ($r) => $this->reservaService->minutosAHora((int) $r->hora_inicio)
+                .' - '.$this->reservaService->minutosAHora((int) $r->hora_fin))
             ->addColumn('estado_badge', fn ($r) => $this->renderEstadoBadge($r->estado))
             ->addColumn('action', fn ($r) => $this->renderAcciones($r))
             ->rawColumns(['estado_badge', 'action'])
@@ -66,8 +66,8 @@ class AdminReservasController extends Controller
     public function show(int $reserva): JsonResponse
     {
         $reserva = Reserva::findOrFail($reserva);
-        $horaInicio = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
-        $horaFin = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
+        $horaInicio = $this->reservaService->minutosAHora((int) $reserva->hora_inicio);
+        $horaFin = $this->reservaService->minutosAHora((int) $reserva->hora_fin);
 
         return response()->json([
             'id' => $reserva->id,
@@ -93,15 +93,15 @@ class AdminReservasController extends Controller
         $fechaAnterior = $reserva->fecha->format('d/m/Y');
         $fechaCambiada = $reserva->fecha->format('Y-m-d') !== $data['fecha'];
 
-        $horaInicio = (float) $data['hora_inicio'];
+        $horaInicio = (int) $data['hora_inicio'];
         $horario = $this->reservaService->getHorarioActivo();
-        $duracion = $horario ? $horario->duracion_tramo : 1;
-        $data['hora_fin'] = $horaInicio + $duracion;
+        $duracionMinutos = $horario ? (int) $horario->duracion_tramo : 60;
+        $data['hora_fin'] = $horaInicio + $duracionMinutos;
 
         $reserva->update($data);
         $reserva->refresh();
 
-        $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+        $horaFormateada = $this->reservaService->minutosAHora((int) $reserva->hora_inicio);
         $empresaSlug = session('empresa_id', '');
 
         if ($estadoAnterior !== 'confirmada' && $reserva->estado === 'confirmada') {
@@ -127,7 +127,7 @@ class AdminReservasController extends Controller
         }
 
         $reserva->update(['estado' => 'confirmada']);
-        $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+        $horaFormateada = $this->reservaService->minutosAHora((int) $reserva->hora_inicio);
         Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, session('empresa_id', ''), $this->empresaNombre()));
 
         return response()->json(['message' => 'Reserva confirmada.']);
@@ -150,7 +150,7 @@ class AdminReservasController extends Controller
     {
         $data = $request->validated();
         $reserva = $this->reservaService->crearReserva($data);
-        $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+        $horaFormateada = $this->reservaService->minutosAHora((int) $reserva->hora_inicio);
         Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, session('empresa_id', ''), $this->empresaNombre()));
 
         return response()->json(['message' => 'Reserva creada correctamente.', 'id' => $reserva->id]);
@@ -173,8 +173,8 @@ class AdminReservasController extends Controller
         ];
 
         $events = $reservas->map(function ($r) use ($colores) {
-            $horaInicio = $this->reservaService->decimalAHora((float) $r->hora_inicio);
-            $horaFin = $this->reservaService->decimalAHora((float) $r->hora_fin);
+            $horaInicio = $this->reservaService->minutosAHora((int) $r->hora_inicio);
+            $horaFin = $this->reservaService->minutosAHora((int) $r->hora_fin);
             $color = $colores[$r->estado] ?? $colores['pendiente'];
 
             return [

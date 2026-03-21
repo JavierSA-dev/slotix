@@ -12,9 +12,9 @@ $(function () {
 
     // ─── HELPERS ───────────────────────────────────────────────
 
-    function decimalAHora(decimal) {
-        const h = Math.floor(decimal);
-        const m = Math.round((decimal - h) * 60);
+    function minutosAHora(minutos) {
+        const h = Math.floor(minutos / 60);
+        const m = minutos % 60;
         return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
     }
 
@@ -100,11 +100,11 @@ $(function () {
     // ─── CLICK EN FRANJA DISPONIBLE ────────────────────────────
 
     $franjasWrapper.on('click', '.franja-card', function () {
-        horaInicioSeleccionada = parseFloat($(this).data('hora'));
+        horaInicioSeleccionada = parseInt($(this).data('hora'), 10);
 
         $('#reserva-fecha').val(fechaSeleccionada);
         $('#reserva-hora-inicio').val(horaInicioSeleccionada);
-        $('#reserva-franja-display').text(decimalAHora(horaInicioSeleccionada));
+        $('#reserva-franja-display').text(minutosAHora(horaInicioSeleccionada));
         $('#reserva-fecha-display').text(formatearFecha(fechaSeleccionada));
 
         resetModal();

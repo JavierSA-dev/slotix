@@ -42,8 +42,8 @@ class MisReservasController extends Controller
 
         $diasAbrev = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
         $reservas = $query->get()->map(function ($reserva) use ($diasAbrev) {
-            $horaInicio = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
-            $horaFin = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
+            $horaInicio = $this->reservaService->minutosAHora((int) $reserva->hora_inicio);
+            $horaFin = $this->reservaService->minutosAHora((int) $reserva->hora_fin);
             $reserva->hora_inicio_fmt = $horaInicio;
             $reserva->hora_fin_fmt = $horaFin;
             $reserva->dia_semana = $diasAbrev[$reserva->fecha->dayOfWeekIso - 1];
@@ -75,7 +75,7 @@ class MisReservasController extends Controller
             return response()->json(['message' => 'Esta reserva ya estaba cancelada.'], 422);
         }
 
-        $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+        $horaFormateada = $this->reservaService->minutosAHora((int) $reserva->hora_inicio);
 
         $this->reservaService->cancelarReserva($reserva);
         Mail::to($reserva->email)->send(new ReservaCanceladaMail($reserva, $horaFormateada));

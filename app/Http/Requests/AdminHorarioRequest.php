@@ -14,8 +14,8 @@ class AdminHorarioRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'hora_apertura' => $this->timeToDecimal($this->input('hora_apertura', '00:00')),
-            'hora_cierre' => $this->timeToDecimal($this->input('hora_cierre', '00:00')),
+            'hora_apertura' => $this->timeToMinutos($this->input('hora_apertura', '00:00')),
+            'hora_cierre' => $this->timeToMinutos($this->input('hora_cierre', '00:00')),
         ]);
     }
 
@@ -24,8 +24,8 @@ class AdminHorarioRequest extends FormRequest
         return [
             'dias_semana' => ['required', 'array', 'min:1'],
             'dias_semana.*' => ['integer', 'between:0,6'],
-            'hora_apertura' => ['required', 'numeric', 'min:0', 'max:23'],
-            'hora_cierre' => ['required', 'numeric', 'min:0', 'max:24', 'gt:hora_apertura'],
+            'hora_apertura' => ['required', 'integer', 'min:0', 'max:1380'],
+            'hora_cierre' => ['required', 'integer', 'min:0', 'max:1440', 'gt:hora_apertura'],
             'duracion_tramo' => ['required', 'integer', 'in:15,30,45,60,90,120'],
             'aforo_por_tramo' => ['required', 'integer', 'min:1', 'max:100'],
             'horas_min_reserva' => ['required', 'integer', 'min:0', 'max:72'],
@@ -44,10 +44,10 @@ class AdminHorarioRequest extends FormRequest
         ];
     }
 
-    private function timeToDecimal(string $time): float
+    private function timeToMinutos(string $time): int
     {
         [$h, $m] = explode(':', $time);
 
-        return (int) $h + ((int) $m / 60);
+        return (int) $h * 60 + (int) $m;
     }
 }

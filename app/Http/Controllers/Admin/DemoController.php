@@ -114,9 +114,9 @@ class DemoController extends Controller
     {
         HorarioConfig::create([
             'dias_semana' => [1, 2, 3, 4, 5, 6, 7],
-            'hora_apertura' => 10.00,
-            'hora_cierre' => 22.00,
-            'duracion_tramo' => 1.00,
+            'hora_apertura' => 600,
+            'hora_cierre' => 1320,
+            'duracion_tramo' => 60,
             'aforo_por_tramo' => 3,
             'horas_min_reserva' => 2,
             'horas_min_cancelacion' => 24,
@@ -133,7 +133,7 @@ class DemoController extends Controller
         ];
 
         $estados = ['confirmada', 'confirmada', 'confirmada', 'pendiente', 'cancelada'];
-        $horas = [10.00, 11.00, 12.00, 13.00, 15.00, 16.00, 17.00, 18.00, 19.00, 20.00];
+        $horas = [600, 660, 720, 780, 900, 960, 1020, 1080, 1140, 1200];
         $personas = [2, 4, 1, 3, 2, 4, 2, 3, 1, 2, 4, 3, 2, 1, 3];
 
         foreach ($nombres as $i => $nombre) {
@@ -145,7 +145,7 @@ class DemoController extends Controller
                 'email' => Str::lower(Str::slug(explode(' ', $nombre)[0])).'@ejemplo.com',
                 'fecha' => $fecha,
                 'hora_inicio' => $hora,
-                'hora_fin' => $hora + 1.00,
+                'hora_fin' => $hora + 60,
                 'num_personas' => $personas[$i],
                 'token' => Str::uuid(),
                 'estado' => $estados[$i % count($estados)],

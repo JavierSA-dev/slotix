@@ -21,7 +21,7 @@ class ReservaService
      * Genera el listado de franjas horarias para una fecha dada,
      * con el conteo de personas reservadas y disponibilidad calculada.
      *
-     * @return array<int, array{hora_inicio: float, hora_fin: float, hora_inicio_fmt: string, hora_fin_fmt: string, reservadas: int, aforo: int, disponible: bool}>
+     * @return array<int, array{hora_inicio: int, hora_fin: int, hora_inicio_fmt: string, hora_fin_fmt: string, reservadas: int, aforo: int, disponible: bool}>
      */
     public function getFranjasDisponibles(Carbon $fecha): array
     {
@@ -39,31 +39,30 @@ class ReservaService
         }
 
         $franjas = [];
-        $paso = $horario->duracion_tramo / 60;
-        $horaActual = (float) $horario->hora_apertura;
-        $horaCierre = (float) $horario->hora_cierre;
+        $paso = (int) $horario->duracion_tramo; // minutos
+        $horaActual = (int) $horario->hora_apertura; // minutos desde medianoche
+        $horaCierre = (int) $horario->hora_cierre; // minutos desde medianoche
 
         // Hora mínima permitida para reservar hoy (hora actual + antelación mínima configurada).
         $esHoy = $fecha->isSameDay(Carbon::today());
         $horaMinPermitida = null;
         if ($esHoy) {
             $ahora = Carbon::now();
-            $horaAhoraDecimal = $ahora->hour + ($ahora->minute / 60);
-            $horaMinPermitida = $horaAhoraDecimal + ($horario->horas_min_reserva ?? 0);
+            $horaAhoraMinutos = $ahora->hour * 60 + $ahora->minute;
+            $horaMinPermitida = $horaAhoraMinutos + ($horario->horas_min_reserva * 60);
         }
 
         // Obtener reservas del día de una sola consulta (previene N+1).
-        // mapWithKeys normaliza las claves a float (MySQL devuelve decimal como string "10.00").
         $reservasPorFranja = Reserva::where('fecha', $fecha->format('Y-m-d'))
             ->whereIn('estado', ['pendiente', 'confirmada'])
             ->selectRaw('hora_inicio, SUM(num_personas) as total')
             ->groupBy('hora_inicio')
             ->get()
-            ->mapWithKeys(fn ($r) => [(float) $r->hora_inicio => (int) $r->total])
+            ->mapWithKeys(fn ($r) => [(int) $r->hora_inicio => (int) $r->total])
             ->toArray();
 
-        while ($horaActual < $horaCierre - $paso + 0.001) {
-            $horaFin = round($horaActual + $paso, 4);
+        while ($horaActual <= $horaCierre - $paso) {
+            $horaFin = $horaActual + $paso;
             $reservadas = $reservasPorFranja[$horaActual] ?? 0;
 
             // Bloquear franjas pasadas o que no cumplen la antelación mínima.
@@ -72,14 +71,14 @@ class ReservaService
             $franjas[] = [
                 'hora_inicio' => $horaActual,
                 'hora_fin' => $horaFin,
-                'hora_inicio_fmt' => $this->decimalAHora($horaActual),
-                'hora_fin_fmt' => $this->decimalAHora($horaFin),
+                'hora_inicio_fmt' => $this->minutosAHora($horaActual),
+                'hora_fin_fmt' => $this->minutosAHora($horaFin),
                 'reservadas' => $reservadas,
                 'aforo' => $horario->aforo_por_tramo,
                 'disponible' => ! $bloqueadaPorTiempo && $reservadas < $horario->aforo_por_tramo,
             ];
 
-            $horaActual = round($horaActual + $paso, 4);
+            $horaActual += $paso;
         }
 
         return $franjas;
@@ -88,7 +87,7 @@ class ReservaService
     /**
      * Verifica si una franja tiene aforo disponible para N personas adicionales.
      */
-    public function validarFranja(Carbon $fecha, float $horaInicio, int $numPersonas): bool
+    public function validarFranja(Carbon $fecha, int $horaInicio, int $numPersonas): bool
     {
         $horario = $this->getHorarioActivo();
 
@@ -111,7 +110,7 @@ class ReservaService
     public function crearReserva(array $data): Reserva
     {
         $horario = $this->getHorarioActivo();
-        $paso = $horario ? $horario->duracion_tramo / 60 : 0.5;
+        $paso = $horario ? (int) $horario->duracion_tramo : 60; // minutos
 
         return Reserva::create([
             'user_id' => auth()->id(),
@@ -119,8 +118,8 @@ class ReservaService
             'email' => $data['email'],
             'telefono' => $data['telefono'] ?? null,
             'fecha' => $data['fecha'],
-            'hora_inicio' => $data['hora_inicio'],
-            'hora_fin' => round($data['hora_inicio'] + $paso, 4),
+            'hora_inicio' => (int) $data['hora_inicio'],
+            'hora_fin' => (int) $data['hora_inicio'] + $paso,
             'num_personas' => $data['num_personas'],
             'token' => Str::uuid()->toString(),
             'estado' => 'pendiente',
@@ -137,26 +136,26 @@ class ReservaService
     }
 
     /**
-     * Convierte hora decimal a string HH:MM.
-     * Ejemplo: 10.5 -> "10:30"
+     * Convierte minutos desde medianoche a string HH:MM.
+     * Ejemplo: 630 -> "10:30"
      */
-    public function decimalAHora(float $decimal): string
+    public function minutosAHora(int $minutos): string
     {
-        $horas = (int) $decimal;
-        $minutos = (int) round(($decimal - $horas) * 60);
+        $horas = intdiv($minutos, 60);
+        $mins = $minutos % 60;
 
-        return sprintf('%02d:%02d', $horas, $minutos);
+        return sprintf('%02d:%02d', $horas, $mins);
     }
 
     /**
-     * Convierte string HH:MM a decimal.
-     * Ejemplo: "10:30" -> 10.5
+     * Convierte string HH:MM a minutos desde medianoche.
+     * Ejemplo: "10:30" -> 630
      */
-    public function horaADecimal(string $hora): float
+    public function horaAMinutos(string $hora): int
     {
         [$h, $m] = explode(':', $hora);
 
-        return (int) $h + ((int) $m / 60);
+        return (int) $h * 60 + (int) $m;
     }
 
     /**

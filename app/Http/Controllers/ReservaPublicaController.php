@@ -60,7 +60,7 @@ class ReservaPublicaController extends Controller
     public function store(string $empresa, CrearReservaRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $horaInicio = (float) $data['hora_inicio'];
+        $horaInicio = (int) $data['hora_inicio'];
         $numPersonas = (int) $data['num_personas'];
         $fecha = Carbon::parse($data['fecha']);
 
@@ -69,8 +69,8 @@ class ReservaPublicaController extends Controller
         }
 
         $reserva = $this->reservaService->crearReserva($data);
-        $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
-        $horaFinFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
+        $horaFormateada = $this->reservaService->minutosAHora((int) $reserva->hora_inicio);
+        $horaFinFormateada = $this->reservaService->minutosAHora((int) $reserva->hora_fin);
 
         $empresaNombre = tenancy()->tenant->nombre ?? config('app.name');
         Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, $empresa, $empresaNombre));
@@ -90,8 +90,8 @@ class ReservaPublicaController extends Controller
     public function show(string $empresa, string $token): View
     {
         $reserva = Reserva::where('token', $token)->firstOrFail();
-        $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
-        $horaFinFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
+        $horaFormateada = $this->reservaService->minutosAHora((int) $reserva->hora_inicio);
+        $horaFinFormateada = $this->reservaService->minutosAHora((int) $reserva->hora_fin);
         $googleCalendarUrl = $this->buildGoogleCalendarUrl($reserva, $horaFormateada, $horaFinFormateada);
         $empresaSlug = $empresa;
         $tenant = tenancy()->tenant;
@@ -113,11 +113,9 @@ class ReservaPublicaController extends Controller
 
         $horario = $this->reservaService->getHorarioActivo();
         if ($horario && $horario->horas_min_cancelacion > 0) {
-            $horaInicioDecimal = (float) $reserva->hora_inicio;
-            $horaInicioH = (int) $horaInicioDecimal;
-            $horaInicioM = (int) round(($horaInicioDecimal - $horaInicioH) * 60);
+            $horaInicioMinutos = (int) $reserva->hora_inicio;
             $fechaHoraReserva = Carbon::parse($reserva->fecha->format('Y-m-d'))
-                ->setTime($horaInicioH, $horaInicioM);
+                ->setTime(intdiv($horaInicioMinutos, 60), $horaInicioMinutos % 60);
             $limiteAntelacion = $fechaHoraReserva->copy()->subHours($horario->horas_min_cancelacion);
 
             if (Carbon::now()->isAfter($limiteAntelacion)) {
@@ -127,7 +125,7 @@ class ReservaPublicaController extends Controller
             }
         }
 
-        $horaFormateada = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
+        $horaFormateada = $this->reservaService->minutosAHora((int) $reserva->hora_inicio);
 
         $empresaNombre = tenancy()->tenant->nombre ?? config('app.name');
         $this->reservaService->cancelarReserva($reserva);

@@ -25,8 +25,8 @@ class Reserva extends Model
     {
         return [
             'fecha' => 'date',
-            'hora_inicio' => 'decimal:2',
-            'hora_fin' => 'decimal:2',
+            'hora_inicio' => 'integer',
+            'hora_fin' => 'integer',
         ];
     }
 

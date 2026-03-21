@@ -16,7 +16,7 @@ class AdminCrearReservaRequest extends FormRequest
     {
         if ($this->filled('hora_inicio')) {
             [$h, $m] = explode(':', $this->input('hora_inicio'));
-            $this->merge(['hora_inicio' => (int) $h + ((int) $m / 60)]);
+            $this->merge(['hora_inicio' => (int) $h * 60 + (int) $m]);
         }
 
         if ($this->filled('user_id')) {
@@ -38,7 +38,7 @@ class AdminCrearReservaRequest extends FormRequest
             'email' => ['required', 'email', 'max:150'],
             'telefono' => ['nullable', 'string', 'max:20'],
             'fecha' => ['required', 'date', 'after_or_equal:today'],
-            'hora_inicio' => ['required', 'numeric', 'min:0', 'max:23.99'],
+            'hora_inicio' => ['required', 'integer', 'min:0', 'max:1439'],
             'num_personas' => ['required', 'integer', 'min:1', 'max:50'],
             'notas' => ['nullable', 'string', 'max:500'],
         ];
