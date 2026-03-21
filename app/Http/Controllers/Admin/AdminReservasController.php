@@ -63,8 +63,9 @@ class AdminReservasController extends Controller
             ->make(true);
     }
 
-    public function show(Reserva $reserva): JsonResponse
+    public function show(int $reserva): JsonResponse
     {
+        $reserva = Reserva::findOrFail($reserva);
         $horaInicio = $this->reservaService->decimalAHora((float) $reserva->hora_inicio);
         $horaFin = $this->reservaService->decimalAHora((float) $reserva->hora_fin);
 
@@ -84,8 +85,9 @@ class AdminReservasController extends Controller
         ]);
     }
 
-    public function update(AdminActualizarReservaRequest $request, Reserva $reserva): JsonResponse
+    public function update(AdminActualizarReservaRequest $request, int $reserva): JsonResponse
     {
+        $reserva = Reserva::findOrFail($reserva);
         $data = $request->validated();
         $estadoAnterior = $reserva->estado;
         $fechaAnterior = $reserva->fecha->format('d/m/Y');
@@ -116,8 +118,10 @@ class AdminReservasController extends Controller
         return response()->json(['message' => 'Reserva actualizada correctamente.']);
     }
 
-    public function confirmar(Reserva $reserva): JsonResponse
+    public function confirmar(int $reserva): JsonResponse
     {
+        $reserva = Reserva::findOrFail($reserva);
+
         if ($reserva->estado !== 'pendiente') {
             return response()->json(['message' => 'Solo se pueden confirmar reservas pendientes.'], 422);
         }
@@ -129,8 +133,10 @@ class AdminReservasController extends Controller
         return response()->json(['message' => 'Reserva confirmada.']);
     }
 
-    public function cancelarAdmin(Reserva $reserva): JsonResponse
+    public function cancelarAdmin(int $reserva): JsonResponse
     {
+        $reserva = Reserva::findOrFail($reserva);
+
         if ($reserva->estado === 'cancelada') {
             return response()->json(['message' => 'La reserva ya está cancelada.'], 422);
         }
