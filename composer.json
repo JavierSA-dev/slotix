@@ -1,8 +1,8 @@
 {
-    "name": "laravel/laravel",
+    "name": "slotix/app",
     "type": "project",
-    "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "description": "Slotix — Plataforma SaaS de Reservas Multi-Tenant",
+    "keywords": ["reservas", "saas", "multi-tenant"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
