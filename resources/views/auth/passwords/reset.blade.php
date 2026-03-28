@@ -1,7 +1,7 @@
 @extends('layouts.master-without-nav')
 
 @section('title')
-@lang('translation.Recover_Password') 2
+Restaurar contraseña
 @endsection
 
 @section('css')
@@ -64,8 +64,8 @@
                                             </div>
 
                                             <div class="mb-3">
-                                                <label for="userpassword">Password <span class="text-danger">*</span></label>
-                                                <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" id="userpassword" placeholder="Enter password">
+                                                <label for="userpassword">Contraseña <span class="text-danger">*</span></label>
+                                                <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" id="userpassword" placeholder="Nueva contraseña">
                                                 @error('password')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
@@ -74,17 +74,17 @@
                                             </div>
 
                                             <div class="mb-3">
-                                                <label for="userpassword">Confirm Password <span class="text-danger">*</span></label>
-                                                <input id="password-confirm" type="password" name="password_confirmation" class="form-control" placeholder="Enter confirm password">
+                                                <label for="userpassword">Confirmar contraseña <span class="text-danger">*</span></label>
+                                                <input id="password-confirm" type="password" name="password_confirmation" class="form-control" placeholder="Repite la contraseña">
                                             </div>
 
                                             <div class="text-end">
-                                                <button class="btn btn-primary w-md waves-effect waves-light" type="submit">Reset</button>
+                                                <button class="btn btn-primary w-md waves-effect waves-light" type="submit">Restaurar contraseña</button>
                                             </div>
 
                                         </form>
                                         <div class="mt-5 text-center">
-                                            <p>Remember It ? <a href="{{ url('login') }}" class="font-weight-medium text-primary"> Sign In here</a> </p>
+                                            <p>¿La has recordado? <a href="{{ url('login') }}" class="font-weight-medium text-primary"> Acceder</a></p>
                                         </div>
                                     </div>
                                 </div>

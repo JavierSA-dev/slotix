@@ -81,6 +81,21 @@
             </div>
             @endhasanyrole
 
+            {{-- BOTÓN COPIAR URL PÚBLICA DE RESERVAS --}}
+            @hasanyrole('SuperAdmin|Admin')
+            @if(session('empresa_id'))
+            <div class="d-flex align-items-center px-1">
+                <button type="button"
+                        id="btn-copiar-url-reservas"
+                        class="btn header-item waves-effect"
+                        title="Copiar enlace público de reservas"
+                        data-url="{{ route('reservas.public.index', session('empresa_id')) }}">
+                    <i class="bx bx-link-alt font-size-18" id="icon-copiar-url"></i>
+                </button>
+            </div>
+            @endif
+            @endhasanyrole
+
             {{-- CAMPANITA DE NOTIFICACIONES (solo admins) --}}
             @hasanyrole('SuperAdmin|Admin')
             <div class="dropdown d-inline-block" id="notif-dropdown">
@@ -154,6 +169,22 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+
+    var btnCopiar = document.getElementById('btn-copiar-url-reservas');
+    if (btnCopiar) {
+        btnCopiar.addEventListener('click', function () {
+            var url = this.dataset.url;
+            var icon = document.getElementById('icon-copiar-url');
+            navigator.clipboard.writeText(url).then(function () {
+                icon.classList.replace('bx-link-alt', 'bx-check');
+                btnCopiar.title = '¡Enlace copiado!';
+                setTimeout(function () {
+                    icon.classList.replace('bx-check', 'bx-link-alt');
+                    btnCopiar.title = 'Copiar enlace público de reservas';
+                }, 2000);
+            });
+        });
+    }
 });
 </script>
 

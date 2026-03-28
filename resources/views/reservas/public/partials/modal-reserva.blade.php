@@ -62,7 +62,7 @@
                 <div id="reserva-success" class="mg-success-box d-none">
                     <div class="mg-success-icon">✅</div>
                     <p class="mb-2"><strong>¡Reserva confirmada!</strong></p>
-                    <p class="small text-muted mb-3">Te hemos enviado un email de confirmación.</p>
+                    <p class="small text-muted mb-3" id="reserva-success-email"></p>
                     <div class="d-flex gap-2 justify-content-center flex-wrap">
                         <a href="#" id="reserva-gestion-link" class="btn btn-sm btn-outline-light">
                             Ver mi reserva

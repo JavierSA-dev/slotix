@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminHorarioRequest;
+use App\Models\DiaCerrado;
 use App\Models\HorarioConfig;
 use App\Services\ReservaService;
 use Illuminate\Http\RedirectResponse;
@@ -25,7 +26,9 @@ class AdminHorarioController extends Controller
             ? $this->reservaService->minutosAHora((int) $horario->hora_cierre)
             : '20:00';
 
-        return view('admin.horario.index', compact('horario', 'horarioAperturaFmt', 'horarioCierreFmt'));
+        $diasCerrados = DiaCerrado::orderBy('fecha_inicio')->get();
+
+        return view('admin.horario.index', compact('horario', 'horarioAperturaFmt', 'horarioCierreFmt', 'diasCerrados'));
     }
 
     public function update(AdminHorarioRequest $request): RedirectResponse

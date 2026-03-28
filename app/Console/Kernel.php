@@ -18,13 +18,14 @@ class Kernel extends ConsoleKernel
 
     /**
      * Define the application's command schedule.
-     *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
-     * @return void
      */
-    protected function schedule(Schedule $schedule)
+    protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Recordatorios automáticos: cada día a las 9:00 para reservas del día siguiente
+        $schedule->command('recordatorios:enviar')->dailyAt('09:00');
+
+        // Limpieza de demos expiradas: cada noche a medianoche
+        $schedule->command('demo:limpiar')->dailyAt('00:00');
     }
 
     /**

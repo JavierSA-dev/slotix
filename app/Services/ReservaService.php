@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\DiaCerrado;
 use App\Models\HorarioConfig;
 use App\Models\Reserva;
 use Carbon\Carbon;
@@ -28,6 +29,13 @@ class ReservaService
         $horario = $this->getHorarioActivo();
 
         if (! $horario) {
+            return [];
+        }
+
+        // Comprobar si la fecha cae dentro de algún período cerrado
+        if (DiaCerrado::where('fecha_inicio', '<=', $fecha->format('Y-m-d'))
+            ->where('fecha_fin', '>=', $fecha->format('Y-m-d'))
+            ->exists()) {
             return [];
         }
 
@@ -169,17 +177,29 @@ class ReservaService
         $diasHabiles = $horario ? $horario->dias_semana : [0, 1, 2, 3, 4, 5, 6];
         $semanasMax = $horario ? (int) $horario->semanas_max_reserva : 4;
         $nombresDias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+        $limite = Carbon::today()->addWeeks($semanasMax);
+
+        // Cargar períodos cerrados que se solapen con el rango visible (una sola consulta)
+        $periodosCerrados = DiaCerrado::where('fecha_fin', '>=', Carbon::today()->toDateString())
+            ->where('fecha_inicio', '<=', $limite->toDateString())
+            ->get(['fecha_inicio', 'fecha_fin']);
+
         $fechas = [];
         $dia = Carbon::today();
-        $limite = Carbon::today()->addWeeks($semanasMax);
         $intentos = 0;
 
         while ($dia->lte($limite) && $intentos < 120) {
             $diaSemana = $dia->dayOfWeekIso - 1;
+            $fechaStr = $dia->format('Y-m-d');
 
-            if (in_array($diaSemana, $diasHabiles)) {
+            $estaCerrada = $periodosCerrados->contains(
+                fn ($p) => $fechaStr >= $p->fecha_inicio->format('Y-m-d') && $fechaStr <= $p->fecha_fin->format('Y-m-d')
+            );
+
+            if (in_array($diaSemana, $diasHabiles) && ! $estaCerrada) {
                 $fechas[] = [
-                    'valor' => $dia->format('Y-m-d'),
+                    'valor' => $fechaStr,
                     'etiqueta' => $nombresDias[$diaSemana].' '.$dia->format('d/m'),
                     'dia_nombre' => $dia->locale('es')->isoFormat('dddd'),
                 ];

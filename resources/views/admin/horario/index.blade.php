@@ -2,6 +2,9 @@
 
 @section('title', 'Horario y aforo')
 
+@push('style')
+@endpush
+
 @section('content')
     <div class="row">
         <div class="col-12">
@@ -175,4 +178,55 @@
             </div>
         </div>
     </div>
+    {{-- SECCIÓN DÍAS CERRADOS --}}
+    <div class="row mt-4">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Días cerrados / festivos</h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDiaCerrado">
+                            <i class="bx bx-plus me-1"></i> Añadir
+                        </button>
+                    </div>
+                    <p class="text-muted small mb-3">Los días marcados aquí no aparecerán como disponibles para reservar, independientemente del horario configurado.</p>
+
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Período</th>
+                                <th>Motivo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaDiasCerrados">
+                            @forelse($diasCerrados as $dia)
+                                <tr id="dia-cerrado-{{ $dia->id }}">
+                                    <td>
+                                        @if($dia->fecha_inicio->eq($dia->fecha_fin))
+                                            {{ $dia->fecha_inicio->format('d/m/Y') }}
+                                        @else
+                                            {{ $dia->fecha_inicio->format('d/m/Y') }} → {{ $dia->fecha_fin->format('d/m/Y') }}
+                                        @endif
+                                    </td>
+                                    <td>{{ $dia->motivo ?? '—' }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger" onclick="eliminarDiaCerrado({{ $dia->id }})">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr id="tablaDiasCerradosVacio">
+                                    <td colspan="3" class="text-muted text-center py-3">No hay días cerrados configurados.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @include('admin.horario.partials.modal-dia-cerrado')
 @endsection

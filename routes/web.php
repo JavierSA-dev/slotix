@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminDiasCerradosController;
 use App\Http\Controllers\Admin\AdminHorarioController;
 use App\Http\Controllers\Admin\AdminNotificacionController;
 use App\Http\Controllers\Admin\AdminReservasController;
@@ -27,7 +28,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['throttle:login'])->group(function () {
     Route::post('login', [LoginController::class, 'login'])->name('login.post');
 });
-
 
 Route::middleware(['throttle:password-reset'])->group(function () {
     Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
@@ -76,6 +76,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/mantenimiento/toggle', [AdminDashboardController::class, 'toggleMantenimiento'])->name('mantenimiento.toggle');
         Route::get('/horario', [AdminHorarioController::class, 'index'])->name('horario.index');
         Route::put('/horario', [AdminHorarioController::class, 'update'])->name('horario.update');
+        Route::post('/dias-cerrados', [AdminDiasCerradosController::class, 'store'])->name('dias-cerrados.store');
+        Route::delete('/dias-cerrados/{diaCerrado}', [AdminDiasCerradosController::class, 'destroy'])->name('dias-cerrados.destroy');
         Route::get('/reservas/get-ajax', [AdminReservasController::class, 'getAjax'])->name('reservas.getAjax');
         Route::get('/reservas/calendar-events', [AdminReservasController::class, 'calendarEvents'])->name('reservas.calendarEvents');
         Route::get('/reservas/buscar-usuarios', [AdminReservasController::class, 'buscarUsuarios'])->name('reservas.buscarUsuarios');

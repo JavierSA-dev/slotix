@@ -88,7 +88,7 @@ $(function () {
         disponibles.forEach(function (franja) {
             const libre = franja.aforo - franja.reservadas;
             html += `
-                <div class="franja-card" data-hora="${franja.hora_inicio}">
+                <div class="franja-card" data-hora="${franja.hora_inicio}" data-libre="${libre}">
                     <div class="franja-hora">${franja.hora_inicio_fmt}</div>
                     <div class="franja-aforo">${libre} plaza${libre !== 1 ? 's' : ''}</div>
                 </div>`;
@@ -101,11 +101,14 @@ $(function () {
 
     $franjasWrapper.on('click', '.franja-card', function () {
         horaInicioSeleccionada = parseInt($(this).data('hora'), 10);
+        var libre = parseInt($(this).data('libre'), 10);
 
         $('#reserva-fecha').val(fechaSeleccionada);
         $('#reserva-hora-inicio').val(horaInicioSeleccionada);
         $('#reserva-franja-display').text(minutosAHora(horaInicioSeleccionada));
         $('#reserva-fecha-display').text(formatearFecha(fechaSeleccionada));
+        $('#res-personas').attr('max', libre);
+        $('label[for="res-personas"]').html('Número de personas <span class="text-danger">*</span> <span class="text-muted" style="font-weight:normal;font-size:0.85em;">(1–' + libre + ')</span>');
 
         resetModal();
         new bootstrap.Modal(document.getElementById('modal-reserva')).show();
@@ -119,6 +122,15 @@ $(function () {
 
     function enviarReserva() {
         const $btn = $('#btn-confirmar-reserva');
+        const $personas = $('#res-personas');
+        const max = parseInt($personas.attr('max'), 10);
+        const val = parseInt($personas.val(), 10);
+
+        if (max && val > max) {
+            $('[data-field-error="num_personas"]').text('El máximo de personas para esta franja es ' + max + '.');
+            return;
+        }
+
         $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Enviando...');
         $('#form-reserva-error').text('');
         $('[data-field-error]').text('');
@@ -130,6 +142,11 @@ $(function () {
             success: function (response) {
                 $('#form-reserva').addClass('d-none');
                 $('#modal-reserva-footer').addClass('d-none');
+                $('#reserva-success-email').text(
+                    response.email_enviado
+                        ? 'Te hemos enviado un email de confirmación.'
+                        : 'No se ha podido enviar el email de confirmación.'
+                );
                 $('#reserva-success').removeClass('d-none');
                 $('#reserva-gestion-link').attr('href', response.url);
                 if (response.google_calendar_url) {

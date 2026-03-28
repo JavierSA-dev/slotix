@@ -134,7 +134,6 @@ File: Main Js File
         document.addEventListener("mozfullscreenchange", exitHandler);
         function exitHandler() {
             if (!document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
-                console.log('pressed');
                 $('body').removeClass('fullscreen-enable');
             }
         }

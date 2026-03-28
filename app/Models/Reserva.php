@@ -20,6 +20,7 @@ class Reserva extends Model
         'estado',
         'notas',
         'notas_admin',
+        'recordatorio_enviado',
     ];
 
     protected function casts(): array
@@ -28,6 +29,7 @@ class Reserva extends Model
             'fecha' => 'date',
             'hora_inicio' => 'integer',
             'hora_fin' => 'integer',
+            'recordatorio_enviado' => 'boolean',
         ];
     }
 

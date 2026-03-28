@@ -73,14 +73,21 @@ class ReservaPublicaController extends Controller
         $horaFinFormateada = $this->reservaService->minutosAHora((int) $reserva->hora_fin);
 
         $empresaNombre = tenancy()->tenant->nombre ?? config('app.name');
-        Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, $empresa, $empresaNombre));
+
+        $emailEnviado = true;
+        try {
+            Mail::to($reserva->email)->send(new ReservaConfirmadaMail($reserva, $horaFormateada, $empresa, $empresaNombre));
+        } catch (\Throwable $e) {
+            $emailEnviado = false;
+        }
+
         $this->notificacionService->nuevaReserva($reserva, $empresa, $horaFormateada);
 
         return response()->json([
-            'message' => '¡Reserva recibida! En breve recibirás un email de confirmación.',
             'token' => $reserva->token,
             'url' => route('reservas.show', [$empresa, $reserva->token]),
             'google_calendar_url' => $this->buildGoogleCalendarUrl($reserva, $horaFormateada, $horaFinFormateada),
+            'email_enviado' => $emailEnviado,
         ]);
     }
 
