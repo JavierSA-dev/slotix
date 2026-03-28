@@ -72,7 +72,10 @@
       "Bash(test -f /d/trabajillos/minigolf_reservas/README.md)",
       "Bash(php artisan make:request ActualizarMiEmpresaRequest --no-interaction)",
       "Bash(php artisan boost:database-schema tenants)",
-      "Bash(*)", "Edit(*)", "Read(*)"
+      "Bash(*)",
+      "Edit(*)",
+      "Read(*)",
+      "mcp__laravel-boost__list-routes"
     ],
     "deny": []
   }

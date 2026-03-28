@@ -49,7 +49,7 @@
 
                                                                     <div>
                                                                         <h4 class="font-size-16 text-primary">Abs1981</h4>
-                                                                        <p class="font-size-14 mb-0">- Skote User</p>
+                                                                        <p class="font-size-14 mb-0">- Usuario de Slotix</p>
                                                                     </div>
                                                                 </div>
 
@@ -57,14 +57,11 @@
 
                                                             <div class="item">
                                                                 <div class="py-3">
-                                                                    <p class="font-size-16 mb-4">" If Every Vendor on Envato
-                                                                        are as supportive as Themesbrand, Development with
-                                                                        be a nice experience. You guys are Wonderful. Keep
-                                                                        us the good work. "</p>
+                                                                    <p class="font-size-16 mb-4">" Gestionar las reservas nunca había sido tan sencillo. Slotix nos ha permitido automatizar todo el proceso. "</p>
 
                                                                     <div>
                                                                         <h4 class="font-size-16 text-primary">nezerious</h4>
-                                                                        <p class="font-size-14 mb-0">- Skote User</p>
+                                                                        <p class="font-size-14 mb-0">- Usuario de Slotix</p>
                                                                     </div>
                                                                 </div>
 
@@ -133,9 +130,7 @@
                                         <p class="mb-0">©
                                             <script>
                                                 document.write(new Date().getFullYear())
-                                            </script> Skote. Crafted with <i
-                                                class="mdi mdi-heart text-danger"></i> by
-                                            Themesbrand
+                                            </script> Slotix
                                         </p>
                                     </div>
                                 </div>

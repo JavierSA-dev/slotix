@@ -17,7 +17,7 @@
                     <div class="col-7">
                         <div class="text-primary p-3">
                             <h5 class="text-primary">Welcome Back !</h5>
-                            <p>Skote Dashboard</p>
+                            <p>Slotix</p>
                         </div>
                     </div>
                     <div class="col-5 align-self-end">
@@ -161,11 +161,7 @@
                             </div>
                             <div class="flex-grow-1">
                                 <div>
-                                    En la navegación izquierda tienes <b>"Ejemplos"</b>, donde encontrarás todo lo que se puede hacer con esta plantilla en la web del desarrollador
-                                    <ul>
-                                        <li>El codigo fuente de cualquier cosa lo tienes en SHAREPOINT > 030-DESARROLLO DE APPS > LARAVEL > Themplate_SKOTE_Html_Laravel11_v4.2.3 > Admin</li>
-                                        <li>Tienes documentoacion en el mismo lugar carpeta "Documentacion"</li>
-                                    </ul>
+                                    En la navegación izquierda tienes acceso a todas las secciones del panel de administración.
                                 </div>
                             </div>
                         </div>
