@@ -13,6 +13,7 @@
 
     <x-crud-datatable :config="$config"></x-crud-datatable>
 
+    @include('admin.reservas.partials.modal-detalle')
     @include('admin.reservas.partials.modal-crear')
     @include('admin.reservas.partials.modal-confirmar')
     @include('admin.reservas.partials.modal-cancelar-admin')
@@ -20,7 +21,63 @@
 
 @push('scripts')
 <script>
-    console.log("hbola");
+    // ─── Ver detalle reserva ──────────────────────────────────
+    var estadoLabels = {
+        confirmada: '<span class="pill-label pill-label-primary">Confirmada</span>',
+        cancelada:  '<span class="pill-label pill-label-secondary">Cancelada</span>',
+        pendiente:  '<span class="pill-label pill-label-warning">Pendiente</span>',
+    };
+
+    $(document).on('click', '.btn-ver-reserva', function () {
+        var id = $(this).data('id');
+        var $modal = $('#modal-detalle-reserva');
+
+        $('#detalle-reserva-loading').removeClass('d-none');
+        $('#detalle-reserva-contenido').addClass('d-none');
+        $('#detalle-reserva-error').addClass('d-none').text('');
+
+        new bootstrap.Modal($modal[0]).show();
+
+        $.ajax({
+            url: '/admin/reservas/' + id,
+            type: 'GET',
+            success: function (data) {
+                $('#detalle-nombre').text(data.nombre);
+                $('#detalle-estado').html(estadoLabels[data.estado] ?? data.estado);
+                $('#detalle-email').text(data.email || '—');
+                $('#detalle-telefono').text(data.telefono || '—');
+                $('#detalle-fecha').text(data.fecha_fmt);
+                $('#detalle-horario').text(data.hora_inicio + ' - ' + data.hora_fin);
+                $('#detalle-personas').text(data.num_personas);
+
+                if (data.notas) {
+                    $('#detalle-notas').text(data.notas);
+                    $('#detalle-notas-wrap').removeClass('d-none');
+                } else {
+                    $('#detalle-notas-wrap').addClass('d-none');
+                }
+
+                if (data.notas_admin) {
+                    $('#detalle-notas-admin').text(data.notas_admin);
+                    $('#detalle-notas-admin-wrap').removeClass('d-none');
+                } else {
+                    $('#detalle-notas-admin-wrap').addClass('d-none');
+                }
+
+                $('#detalle-reserva-loading').addClass('d-none');
+                $('#detalle-reserva-contenido').removeClass('d-none');
+            },
+            error: function () {
+                $('#detalle-reserva-loading').addClass('d-none');
+                $('#detalle-reserva-error').removeClass('d-none').text('No se pudo cargar la reserva.');
+            }
+        });
+    });
+
+    $('#modal-detalle-reserva').on('hidden.bs.modal', function () {
+        $('#detalle-reserva-contenido').addClass('d-none');
+        $('#detalle-reserva-error').addClass('d-none').text('');
+    });
     
     // ─── Confirmar reserva ────────────────────────────────────
     $(document).on('click', '.btn-confirmar-reserva', function () {

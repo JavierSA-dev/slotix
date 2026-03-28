@@ -248,9 +248,8 @@ class AdminReservasController extends Controller
 
     private function renderAcciones(Reserva $reserva): string
     {
-        $urlVer = route('reservas.show', ['empresa' => session('empresa_id'), 'token' => $reserva->token]);
         $btn = '<div class="d-flex gap-1 justify-content-center">';
-        $btn .= '<a href="'.$urlVer.'" target="_blank" class="btn btn-sm btn-info" title="Ver reserva"><i class="fa fa-eye"></i></a>';
+        $btn .= '<button class="btn btn-sm btn-info btn-ver-reserva" data-id="'.$reserva->id.'" title="Ver reserva"><i class="fa fa-eye"></i></button>';
 
         if ($reserva->estado === 'pendiente') {
             $btn .= '<button class="btn btn-sm btn-success btn-confirmar-reserva" data-id="'.$reserva->id.'" title="Confirmar"><i class="fa fa-check"></i></button>';
